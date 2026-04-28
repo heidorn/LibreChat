@@ -659,12 +659,55 @@ const processAgentFileUpload = async ({ req, res, metadata }) => {
     // SECOND: Upload to Vector DB
     const { uploadVectors } = require('./VectorDB/crud');
 
-    embeddingResult = await uploadVectors({
-      req,
-      file,
-      file_id,
-      entity_id,
-    });
+    try {
+      embeddingResult = await uploadVectors({
+        req,
+        file,
+        file_id,
+        entity_id,
+      });
+    } catch (error) {
+      const canFallbackToDocumentParser = documentParserMimeTypes.some((regex) =>
+        regex.test(file.mimetype),
+      );
+
+      if (!canFallbackToDocumentParser) {
+        throw error;
+      }
+
+      logger.warn(
+        `[processAgentFileUpload] Vector embedding failed for "${file.originalname}", retrying with extracted text.`,
+      );
+
+      const { handleFileUpload: parseDocumentFile } =
+        getStrategyFunctions(FileSources.document_parser);
+      const parsedDocument = await parseDocumentFile({ req, file, loadAuthValues });
+      const textFilePath = path.join(
+        path.dirname(file.path),
+        `${file_id}-${sanitizeFilename(file.originalname)}.txt`,
+      );
+
+      await fs.promises.writeFile(textFilePath, parsedDocument.text, 'utf8');
+
+      const textFile = {
+        ...file,
+        path: textFilePath,
+        size: Buffer.byteLength(parsedDocument.text, 'utf8'),
+        mimetype: 'text/plain',
+        originalname: `${sanitizeFilename(file.originalname)}.txt`,
+      };
+
+      try {
+        embeddingResult = await uploadVectors({
+          req,
+          file: textFile,
+          file_id,
+          entity_id,
+        });
+      } finally {
+        await fs.promises.unlink(textFilePath).catch(() => {});
+      }
+    }
 
     // Vector status will be stored at root level, no need for metadata
     fileInfoMetadata = {};
