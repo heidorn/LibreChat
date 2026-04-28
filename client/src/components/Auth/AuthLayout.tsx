@@ -60,12 +60,14 @@ function AuthLayout({
     <div className="relative flex min-h-screen flex-col bg-white dark:bg-gray-900">
       <Banner />
       <BlinkAnimation active={isFetching}>
-        <div className="mt-6 h-16 w-full bg-cover">
-          <img
-            src="assets/leads-per-hour/logo.png"
-            className="h-full w-full object-contain px-4"
-            alt={localize('com_ui_logo', { 0: startupConfig?.appTitle ?? 'Leads Per Hour' })}
-          />
+        <div className="mt-6 flex h-20 w-full justify-center">
+          <div className="flex h-16 w-[300px] max-w-[82vw] items-center justify-center rounded-2xl bg-white px-5 shadow-sm">
+            <img
+              src="assets/leads-per-hour/logo.png"
+              className="h-12 w-full object-contain"
+              alt={localize('com_ui_logo', { 0: startupConfig?.appTitle ?? 'Leads Per Hour' })}
+            />
+          </div>
         </div>
       </BlinkAnimation>
       <DisplayError />

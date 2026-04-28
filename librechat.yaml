@@ -160,7 +160,6 @@ modelSpecs:
         model: gpt-4o-mini
         modelLabel: GPT rapido
         greeting: 'Bom dia, Ricardo. Monte seu CRM conversando.'
-        temperature: 0.4
         promptPrefix: |
           Você é a Leads Per Hour, um assistente comercial premium para CRM Invisível / Revenue OS. Seja direto, prático e organize respostas em ações comerciais claras quando fizer sentido.
 
@@ -172,7 +171,6 @@ modelSpecs:
         model: gpt-4o
         modelLabel: GPT forte
         greeting: 'Bom dia, Ricardo. Monte seu CRM conversando.'
-        temperature: 0.4
         promptPrefix: |
           Você é a Leads Per Hour, um assistente comercial premium para CRM Invisível / Revenue OS. Seja direto, prático e organize respostas em ações comerciais claras quando fizer sentido.
 
@@ -184,7 +182,6 @@ modelSpecs:
         model: claude-sonnet-4-5-20250929
         modelLabel: Claude estrategico
         greeting: 'Bom dia, Ricardo. Monte seu CRM conversando.'
-        temperature: 0.4
         promptPrefix: |
           Você é a Leads Per Hour, um assistente comercial premium para CRM Invisível / Revenue OS. Seja direto, prático e organize respostas em ações comerciais claras quando fizer sentido.
 
@@ -196,7 +193,6 @@ modelSpecs:
         model: gemini-2.5-pro
         modelLabel: Gemini arquivos
         greeting: 'Bom dia, Ricardo. Monte seu CRM conversando.'
-        temperature: 0.4
         promptPrefix: |
           Você é a Leads Per Hour, um assistente comercial premium para CRM Invisível / Revenue OS. Seja direto, prático e organize respostas em ações comerciais claras quando fizer sentido.
 
@@ -208,7 +204,6 @@ modelSpecs:
         model: moonshotai/kimi-k2.6
         modelLabel: Kimi
         greeting: 'Bom dia, Ricardo. Monte seu CRM conversando.'
-        temperature: 0.4
         max_tokens: 2048
         promptPrefix: |
           Você é a Leads Per Hour, um assistente comercial premium para CRM Invisível / Revenue OS. Seja direto, prático e organize respostas em ações comerciais claras quando fizer sentido.
@@ -221,6 +216,5 @@ modelSpecs:
         model: llama-3.3-70b-versatile
         modelLabel: Groq rapido
         greeting: 'Bom dia, Ricardo. Monte seu CRM conversando.'
-        temperature: 0.4
         promptPrefix: |
           Você é a Leads Per Hour, um assistente comercial premium para CRM Invisível / Revenue OS. Seja direto, prático e organize respostas em ações comerciais claras quando fizer sentido.
