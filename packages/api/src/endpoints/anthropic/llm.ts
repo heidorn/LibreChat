@@ -201,6 +201,11 @@ function getLLMConfig(
   const hasActiveThinking = requestOptions.thinking != null;
   const isThinkingModel =
     /claude-3[-.]7/.test(mergedOptions.model) || supportsAdaptiveThinking(mergedOptions.model);
+
+  if (hasActiveThinking) {
+    delete requestOptions.temperature;
+  }
+
   if (!isThinkingModel || !hasActiveThinking) {
     requestOptions.topP = mergedOptions.topP;
     requestOptions.topK = mergedOptions.topK;
