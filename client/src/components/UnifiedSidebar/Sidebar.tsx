@@ -22,22 +22,18 @@ function Sidebar({
   return (
     <>
       <div className="flex h-full w-full overflow-hidden">
-        <ExpandedPanel
-          links={links}
-          expanded={expanded}
-          onCollapse={onCollapse}
-          onExpand={onExpand}
-        />
-        <nav
-          className={cn(
-            'min-h-0 flex-1 overflow-hidden bg-surface-primary-alt',
-            expanded ? 'opacity-100' : 'pointer-events-none opacity-0',
-          )}
-          style={{ transition: expanded ? 'opacity 200ms ease 80ms' : 'opacity 150ms ease' }}
-          aria-hidden={!expanded}
-        >
-          <SidePanelNav links={links} />
-        </nav>
+        {expanded ? (
+          <nav className="min-h-0 flex-1 overflow-hidden bg-surface-primary-alt">
+            <SidePanelNav links={links} />
+          </nav>
+        ) : (
+          <ExpandedPanel
+            links={links}
+            expanded={expanded}
+            onCollapse={onCollapse}
+            onExpand={onExpand}
+          />
+        )}
       </div>
       <div
         role="separator"

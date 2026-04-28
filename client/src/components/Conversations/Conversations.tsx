@@ -1,6 +1,5 @@
 import { useMemo, memo, type FC, useCallback, useEffect, useRef } from 'react';
 import throttle from 'lodash/throttle';
-import { ChevronDown } from 'lucide-react';
 import { useRecoilValue } from 'recoil';
 import { Spinner, useMediaQuery } from '@librechat/client';
 import { List, AutoSizer, CellMeasurer, CellMeasurerCache } from 'react-virtualized';
@@ -71,30 +70,6 @@ const LoadingSpinner = memo(() => {
 
 LoadingSpinner.displayName = 'LoadingSpinner';
 
-interface ChatsHeaderProps {
-  isExpanded: boolean;
-  onToggle: () => void;
-}
-
-/** Collapsible header for the Chats section */
-const ChatsHeader: FC<ChatsHeaderProps> = memo(({ isExpanded, onToggle }) => {
-  const localize = useLocalize();
-  return (
-    <button
-      onClick={onToggle}
-      className="group flex w-full items-center justify-between rounded-lg px-1 py-2 text-xs font-bold text-text-secondary outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-black dark:focus-visible:ring-white"
-      type="button"
-    >
-      <span className="select-none">{localize('com_ui_chats')}</span>
-      <ChevronDown
-        className={cn('h-3 w-3 transition-transform duration-200', isExpanded ? 'rotate-180' : '')}
-      />
-    </button>
-  );
-});
-
-ChatsHeader.displayName = 'ChatsHeader';
-
 const DateLabel: FC<{ groupName: string; isFirst?: boolean }> = memo(({ groupName, isFirst }) => {
   const localize = useLocalize();
   return (
@@ -114,7 +89,6 @@ DateLabel.displayName = 'DateLabel';
 
 type FlattenedItem =
   | { type: 'favorites' }
-  | { type: 'chats-header' }
   | { type: 'header'; groupName: string }
   | { type: 'convo'; convo: TConversation }
   | { type: 'loading' };
@@ -159,7 +133,7 @@ const Conversations: FC<ConversationsProps> = ({
   isLoading,
   isSearchLoading,
   isChatsExpanded,
-  setIsChatsExpanded,
+  setIsChatsExpanded: _setIsChatsExpanded,
 }) => {
   const localize = useLocalize();
   const search = useRecoilValue(store.search);
@@ -199,7 +173,6 @@ const Conversations: FC<ConversationsProps> = ({
     if (shouldShowFavorites) {
       items.push({ type: 'favorites' });
     }
-    items.push({ type: 'chats-header' });
 
     if (isChatsExpanded) {
       groupedConversations.forEach(([groupName, convos]) => {
@@ -231,9 +204,6 @@ const Conversations: FC<ConversationsProps> = ({
           }
           if (item.type === 'favorites') {
             return `favorites-${favoritesContentKeyRef.current}`;
-          }
-          if (item.type === 'chats-header') {
-            return 'chats-header';
           }
           if (item.type === 'header') {
             return `header-${item.groupName}`;
@@ -297,22 +267,11 @@ const Conversations: FC<ConversationsProps> = ({
         );
       }
 
-      if (item.type === 'chats-header') {
-        return (
-          <MeasuredRow key={key} {...rowProps}>
-            <ChatsHeader
-              isExpanded={isChatsExpanded}
-              onToggle={() => setIsChatsExpanded(!isChatsExpanded)}
-            />
-          </MeasuredRow>
-        );
-      }
-
       if (item.type === 'header') {
         // First date header index depends on whether favorites row is included
-        // With favorites: [favorites, chats-header, first-header] → index 2
-        // Without favorites: [chats-header, first-header] → index 1
-        const firstHeaderIndex = shouldShowFavorites ? 2 : 1;
+        // With favorites: [favorites, first-header] -> index 1
+        // Without favorites: [first-header] -> index 0
+        const firstHeaderIndex = shouldShowFavorites ? 1 : 0;
         return (
           <MeasuredRow key={key} {...rowProps}>
             <DateLabel groupName={item.groupName} isFirst={index === firstHeaderIndex} />
@@ -343,7 +302,6 @@ const Conversations: FC<ConversationsProps> = ({
       toggleNav,
       isSmallScreen,
       isChatsExpanded,
-      setIsChatsExpanded,
       shouldShowFavorites,
       activeJobIds,
     ],

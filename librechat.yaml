@@ -142,6 +142,7 @@ modelSpecs:
   enforce: false
   prioritize: true
   addedEndpoints:
+    - agents
     - openAI
     - anthropic
     - google
