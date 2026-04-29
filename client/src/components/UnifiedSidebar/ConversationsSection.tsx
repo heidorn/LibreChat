@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState, useMemo, memo, lazy, Suspense, useRef
 import { useSetRecoilState, useRecoilValue } from 'recoil';
 import { useMediaQuery } from '@librechat/client';
 import { PermissionTypes, Permissions } from 'librechat-data-provider';
-import { Folder, MoreHorizontal, Plus, Search, SquarePen } from 'lucide-react';
+import { Folder, MoreHorizontal, Plus, Search, SquarePen, X } from 'lucide-react';
 import type { InfiniteQueryObserverResult } from '@tanstack/react-query';
 import type { ConversationListResponse } from 'librechat-data-provider';
 import type { List } from 'react-virtualized';
@@ -22,8 +22,12 @@ import store from '~/store';
 const BookmarkNav = lazy(() => import('~/components/Nav/Bookmarks/BookmarkNav'));
 const AccountSettings = lazy(() => import('~/components/Nav/AccountSettings'));
 
-const pinnedProjects = [
-  'Novo Projeto',
+type LocalProject = {
+  id: string;
+  name: string;
+};
+
+const defaultProjectNames = [
   'Projeto 01',
   'Projeto 02',
   'Projeto 03',
@@ -31,6 +35,8 @@ const pinnedProjects = [
   'Projeto 05',
   'Projeto 06',
 ];
+
+const projectsStorageKey = 'lph.sidebar.projects';
 
 const ConversationsSection = memo(() => {
   const localize = useLocalize();
@@ -43,6 +49,19 @@ const ConversationsSection = memo(() => {
   const [isChatsExpanded, setIsChatsExpanded] = useLocalStorage('chatsExpanded', true);
   const [showLoading, setShowLoading] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
+  const [projectName, setProjectName] = useState('');
+  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
+  const [localProjects, setLocalProjects] = useState<LocalProject[]>(() => {
+    if (typeof window === 'undefined') {
+      return [];
+    }
+    try {
+      const storedProjects = window.localStorage.getItem(projectsStorageKey);
+      return storedProjects ? JSON.parse(storedProjects) : [];
+    } catch {
+      return [];
+    }
+  });
 
   const hasAccessToBookmarks = useHasAccess({
     permissionType: PermissionTypes.BOOKMARKS,
@@ -88,6 +107,40 @@ const ConversationsSection = memo(() => {
   const conversations = useMemo(() => {
     return data ? data.pages.flatMap((page) => page.conversations) : [];
   }, [data]);
+
+  const visibleProjects = useMemo(() => {
+    const savedNames = new Set(localProjects.map((project) => project.name));
+    const fallbackProjects = defaultProjectNames
+      .filter((project) => !savedNames.has(project))
+      .map((name, index) => ({ id: `default-${index}`, name }));
+    return [...localProjects, ...fallbackProjects].slice(0, 6);
+  }, [localProjects]);
+
+  const hiddenProjects = useMemo(() => {
+    const savedNames = new Set(localProjects.map((project) => project.name));
+    const fallbackProjects = defaultProjectNames
+      .filter((project) => !savedNames.has(project))
+      .map((name, index) => ({ id: `hidden-default-${index}`, name }));
+    return [...localProjects, ...fallbackProjects].slice(6);
+  }, [localProjects]);
+
+  useEffect(() => {
+    window.localStorage.setItem(projectsStorageKey, JSON.stringify(localProjects));
+  }, [localProjects]);
+
+  const createProject = useCallback(() => {
+    const nextName = projectName.trim();
+    if (!nextName) {
+      return;
+    }
+
+    setLocalProjects((projects) => [
+      { id: `${Date.now()}`, name: nextName },
+      ...projects.filter((project) => project.name.toLowerCase() !== nextName.toLowerCase()),
+    ]);
+    setProjectName('');
+    setIsProjectModalOpen(false);
+  }, [projectName]);
 
   const toggleNav = useCallback(() => {
     if (isSmallScreen) {
@@ -156,20 +209,24 @@ const ConversationsSection = memo(() => {
           Projetos
         </div>
         <div className="space-y-1">
-          {pinnedProjects.map((project, index) => {
-            const isNewProject = index === 0;
-            const Icon = isNewProject ? Plus : Folder;
-            return (
-              <button
-                key={project}
-                type="button"
-                className="flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm text-text-primary hover:bg-surface-active-alt"
-              >
-                <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
-                <span className="truncate">{project}</span>
-              </button>
-            );
-          })}
+          <button
+            type="button"
+            className="flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm text-text-primary hover:bg-surface-active-alt"
+            onClick={() => setIsProjectModalOpen(true)}
+          >
+            <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <span className="truncate">Novo Projeto</span>
+          </button>
+          {visibleProjects.map((project) => (
+            <button
+              key={project.id}
+              type="button"
+              className="flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm text-text-primary hover:bg-surface-active-alt"
+            >
+              <Folder className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <span className="truncate">{project.name}</span>
+            </button>
+          ))}
           <button
             type="button"
             className="flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm text-text-primary hover:bg-surface-active-alt"
@@ -177,6 +234,13 @@ const ConversationsSection = memo(() => {
             <MoreHorizontal className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>Mais</span>
           </button>
+          {hiddenProjects.length > 0 && (
+            <div className="hidden">
+              {hiddenProjects.map((project) => (
+                <span key={project.id}>{project.name}</span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
@@ -209,6 +273,54 @@ const ConversationsSection = memo(() => {
           <AccountSettings />
         </Suspense>
       </div>
+
+      {isProjectModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-md rounded-2xl border border-border-light bg-surface-primary p-5 shadow-2xl">
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-text-primary">Criar projeto</h2>
+              <button
+                type="button"
+                className="rounded-lg p-2 text-text-secondary hover:bg-surface-active-alt hover:text-text-primary"
+                aria-label="Fechar"
+                onClick={() => setIsProjectModalOpen(false)}
+              >
+                <X className="h-5 w-5" aria-hidden="true" />
+              </button>
+            </div>
+            <label className="mb-2 block text-sm font-medium text-text-primary" htmlFor="project-name">
+              Nome do projeto
+            </label>
+            <input
+              id="project-name"
+              className="mb-4 h-11 w-full rounded-xl border border-border-light bg-surface-secondary px-3 text-sm text-text-primary outline-none focus:border-text-primary"
+              value={projectName}
+              placeholder="Ex: Leads Per Hour"
+              onChange={(event) => setProjectName(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter') {
+                  createProject();
+                }
+              }}
+              autoFocus
+            />
+            <p className="mb-5 text-sm text-text-secondary">
+              Esta primeira versão organiza projetos na sidebar. Na próxima fase, conectamos ao banco
+              para vincular chats, arquivos e memórias.
+            </p>
+            <div className="flex justify-end">
+              <button
+                type="button"
+                className="rounded-full bg-text-primary px-5 py-2 text-sm font-medium text-surface-primary disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={!projectName.trim()}
+                onClick={createProject}
+              >
+                Criar projeto
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 });

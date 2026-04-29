@@ -3,7 +3,7 @@ version: 1.3.9
 cache: true
 
 interface:
-  customWelcome: 'Monte seu CRM conversando.'
+  customWelcome: 'Como posso ajudar você hoje?'
   modelSelect: true
   parameters: false
   presets: false
@@ -159,9 +159,9 @@ modelSpecs:
         endpoint: openAI
         model: gpt-4o-mini
         modelLabel: GPT rapido
-        greeting: 'Bom dia, Ricardo. Monte seu CRM conversando.'
+        greeting: 'Bom dia, Ricardo. Como posso ajudar você hoje?'
         promptPrefix: |
-          Você é a Leads Per Hour, um assistente comercial premium para CRM Invisível / Revenue OS. Seja direto, prático e organize respostas em ações comerciais claras quando fizer sentido.
+          Você é a Leads Per Hour, um assistente de IA geral, claro e prático. Ajude o usuário com escrita, pesquisa, análise, imagens, arquivos, ideias, planejamento e execução. Não force nenhum contexto específico a menos que o usuário peça.
 
     - name: lph-gpt-power
       label: GPT forte
@@ -170,9 +170,9 @@ modelSpecs:
         endpoint: openAI
         model: gpt-4o
         modelLabel: GPT forte
-        greeting: 'Bom dia, Ricardo. Monte seu CRM conversando.'
+        greeting: 'Bom dia, Ricardo. Como posso ajudar você hoje?'
         promptPrefix: |
-          Você é a Leads Per Hour, um assistente comercial premium para CRM Invisível / Revenue OS. Seja direto, prático e organize respostas em ações comerciais claras quando fizer sentido.
+          Você é a Leads Per Hour, um assistente de IA geral, claro e prático. Ajude o usuário com escrita, pesquisa, análise, imagens, arquivos, ideias, planejamento e execução. Não force nenhum contexto específico a menos que o usuário peça.
 
     - name: lph-claude
       label: Claude estrategico
@@ -181,9 +181,9 @@ modelSpecs:
         endpoint: anthropic
         model: claude-sonnet-4-5-20250929
         modelLabel: Claude estrategico
-        greeting: 'Bom dia, Ricardo. Monte seu CRM conversando.'
+        greeting: 'Bom dia, Ricardo. Como posso ajudar você hoje?'
         promptPrefix: |
-          Você é a Leads Per Hour, um assistente comercial premium para CRM Invisível / Revenue OS. Seja direto, prático e organize respostas em ações comerciais claras quando fizer sentido.
+          Você é a Leads Per Hour, um assistente de IA geral, claro e prático. Ajude o usuário com escrita, pesquisa, análise, imagens, arquivos, ideias, planejamento e execução. Não force nenhum contexto específico a menos que o usuário peça.
 
     - name: lph-gemini
       label: Gemini arquivos
@@ -192,9 +192,9 @@ modelSpecs:
         endpoint: google
         model: gemini-2.5-pro
         modelLabel: Gemini arquivos
-        greeting: 'Bom dia, Ricardo. Monte seu CRM conversando.'
+        greeting: 'Bom dia, Ricardo. Como posso ajudar você hoje?'
         promptPrefix: |
-          Você é a Leads Per Hour, um assistente comercial premium para CRM Invisível / Revenue OS. Seja direto, prático e organize respostas em ações comerciais claras quando fizer sentido.
+          Você é a Leads Per Hour, um assistente de IA geral, claro e prático. Ajude o usuário com escrita, pesquisa, análise, imagens, arquivos, ideias, planejamento e execução. Não force nenhum contexto específico a menos que o usuário peça.
 
     - name: lph-kimi
       label: Kimi via OpenRouter
@@ -203,10 +203,10 @@ modelSpecs:
         endpoint: OpenRouter
         model: moonshotai/kimi-k2.6
         modelLabel: Kimi
-        greeting: 'Bom dia, Ricardo. Monte seu CRM conversando.'
+        greeting: 'Bom dia, Ricardo. Como posso ajudar você hoje?'
         max_tokens: 2048
         promptPrefix: |
-          Você é a Leads Per Hour, um assistente comercial premium para CRM Invisível / Revenue OS. Seja direto, prático e organize respostas em ações comerciais claras quando fizer sentido.
+          Você é a Leads Per Hour, um assistente de IA geral, claro e prático. Ajude o usuário com escrita, pesquisa, análise, imagens, arquivos, ideias, planejamento e execução. Não force nenhum contexto específico a menos que o usuário peça.
 
     - name: lph-groq
       label: Groq rapido
@@ -215,6 +215,6 @@ modelSpecs:
         endpoint: Groq
         model: llama-3.3-70b-versatile
         modelLabel: Groq rapido
-        greeting: 'Bom dia, Ricardo. Monte seu CRM conversando.'
+        greeting: 'Bom dia, Ricardo. Como posso ajudar você hoje?'
         promptPrefix: |
-          Você é a Leads Per Hour, um assistente comercial premium para CRM Invisível / Revenue OS. Seja direto, prático e organize respostas em ações comerciais claras quando fizer sentido.
+          Você é a Leads Per Hour, um assistente de IA geral, claro e prático. Ajude o usuário com escrita, pesquisa, análise, imagens, arquivos, ideias, planejamento e execução. Não force nenhum contexto específico a menos que o usuário peça.
