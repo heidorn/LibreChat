@@ -11,7 +11,6 @@ import {
   useLocalize,
   useHasAccess,
   useAuthContext,
-  useLocalStorage,
   useNavScrolling,
   useNewConvo,
 } from '~/hooks';
@@ -37,7 +36,6 @@ const ConversationsSection = memo(() => {
   const { newConversation } = useNewConvo();
   useTitleGeneration(isAuthenticated);
 
-  const [isChatsExpanded, setIsChatsExpanded] = useLocalStorage('chatsExpanded', true);
   const [showLoading, setShowLoading] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
   const [projectName, setProjectName] = useState('');
@@ -226,8 +224,8 @@ const ConversationsSection = memo(() => {
           loadMoreConversations={loadMoreConversations}
           isLoading={isFetchingNextPage || showLoading || isLoading}
           isSearchLoading={isSearchLoading}
-          isChatsExpanded={isChatsExpanded}
-          setIsChatsExpanded={setIsChatsExpanded}
+          isChatsExpanded={true}
+          setIsChatsExpanded={() => undefined}
         />
       </div>
 

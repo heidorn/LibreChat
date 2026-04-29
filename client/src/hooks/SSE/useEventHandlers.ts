@@ -582,6 +582,23 @@ export default function useEventHandlers({
             return update;
           });
 
+          if (!_isTemporary && conversation.conversationId) {
+            if (isNewConvo) {
+              addConvoToAllQueries(queryClient, conversation as TConversation);
+            } else {
+              updateConvoInAllQueries(
+                queryClient,
+                conversation.conversationId,
+                () => conversation as TConversation,
+                true,
+              );
+            }
+            queryClient.invalidateQueries({
+              queryKey: [QueryKeys.allConversations],
+              refetchPage: (_, index) => index === 0,
+            });
+          }
+
           if (conversation.conversationId && submission.ephemeralAgent) {
             applyAgentTemplate({
               targetId: conversation.conversationId,

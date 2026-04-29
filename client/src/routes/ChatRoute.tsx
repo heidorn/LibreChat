@@ -51,9 +51,6 @@ export default function ChatRoute() {
   const index = 0;
   const [searchParams] = useSearchParams();
   const { conversationId = '' } = useParams();
-  const projectId = searchParams.get('projectId') ?? undefined;
-  const projectQuery = useProjectQuery(projectId);
-  const projectMemoriesQuery = useProjectMemoriesQuery(projectId);
   useIdChangeEffect(conversationId);
   const { hasSetConversation, conversation } = store.useCreateConversationAtom(index);
   const { newConversation } = useNewConvo();
@@ -68,6 +65,10 @@ export default function ChatRoute() {
     enabled:
       isAuthenticated && conversationId !== Constants.NEW_CONVO && !hasSetConversation.current,
   });
+  const projectId =
+    searchParams.get('projectId') ?? initialConvoQuery.data?.projectId ?? conversation?.projectId;
+  const projectQuery = useProjectQuery(projectId);
+  const projectMemoriesQuery = useProjectMemoriesQuery(projectId);
   const endpointsQuery = useGetEndpointsQuery({ enabled: isAuthenticated });
   const assistantListMap = useAssistantListMap();
 
@@ -99,19 +100,7 @@ export default function ChatRoute() {
 
     const isNewConvo = conversationId === Constants.NEW_CONVO;
 
-    const getNewConvoPreset = () => {
-      const result = getDefaultModelSpec(startupConfig);
-      const spec = result?.default ?? result?.last;
-      const specPreset = spec ? getModelSpecPreset(spec) : undefined;
-
-      const queryParams: Record<string, string> = {};
-      searchParams.forEach((value, key) => {
-        if (key !== 'prompt' && key !== 'q' && key !== 'submit') {
-          queryParams[key] = value;
-        }
-      });
-      const querySettings = processValidSettings(queryParams);
-
+    const getProjectSettings = (basePromptPrefix?: string | null) => {
       const project = projectQuery.data;
       const projectMemories = projectMemoriesQuery.data?.memories ?? [];
       const projectMemoryText = projectMemories.map((memory) => `- ${memory.content}`).join('\n');
@@ -124,14 +113,29 @@ export default function ChatRoute() {
             .filter(Boolean)
             .join('\n\n')
         : '';
-      const projectSettings = projectPrompt
+      return projectPrompt
         ? {
-            promptPrefix: [specPreset?.promptPrefix, projectPrompt].filter(Boolean).join('\n\n'),
+            promptPrefix: [basePromptPrefix, projectPrompt].filter(Boolean).join('\n\n'),
             projectId,
           }
         : projectId
           ? { projectId }
           : {};
+    };
+
+    const getNewConvoPreset = () => {
+      const result = getDefaultModelSpec(startupConfig);
+      const spec = result?.default ?? result?.last;
+      const specPreset = spec ? getModelSpecPreset(spec) : undefined;
+
+      const queryParams: Record<string, string> = {};
+      searchParams.forEach((value, key) => {
+        if (key !== 'prompt' && key !== 'q' && key !== 'submit') {
+          queryParams[key] = value;
+        }
+      });
+      const querySettings = processValidSettings(queryParams);
+      const projectSettings = getProjectSettings(specPreset?.promptPrefix);
 
       if (Object.keys(querySettings).length > 0 || Object.keys(projectSettings).length > 0) {
         return mergeQuerySettingsWithSpec(specPreset, { ...querySettings, ...projectSettings });
@@ -152,12 +156,21 @@ export default function ChatRoute() {
       });
 
       hasSetConversation.current = true;
-    } else if (initialConvoQuery.data && endpointsQuery.data && modelsQuery.data) {
+    } else if (
+      initialConvoQuery.data &&
+      endpointsQuery.data &&
+      modelsQuery.data &&
+      projectReady
+    ) {
       logger.log('conversation', 'ChatRoute initialConvoQuery', initialConvoQuery.data);
+      const projectSettings = getProjectSettings(initialConvoQuery.data.promptPrefix);
       newConversation({
         template: initialConvoQuery.data,
         /* this is necessary to load all existing settings */
-        preset: initialConvoQuery.data as TPreset,
+        preset:
+          Object.keys(projectSettings).length > 0
+            ? mergeQuerySettingsWithSpec(initialConvoQuery.data as TPreset, projectSettings)
+            : (initialConvoQuery.data as TPreset),
         modelsData: modelsQuery.data,
         keepLatestMessage: true,
       });
@@ -201,13 +214,18 @@ export default function ChatRoute() {
       });
       hasSetConversation.current = true;
     } else if (
+      projectReady &&
       assistantListMap[EModelEndpoint.assistants] &&
       assistantListMap[EModelEndpoint.azureAssistants]
     ) {
       logger.log('conversation', 'ChatRoute convo, assistants effect', initialConvoQuery.data);
+      const projectSettings = getProjectSettings(initialConvoQuery.data?.promptPrefix);
       newConversation({
         template: initialConvoQuery.data,
-        preset: initialConvoQuery.data as TPreset,
+        preset:
+          initialConvoQuery.data && Object.keys(projectSettings).length > 0
+            ? mergeQuerySettingsWithSpec(initialConvoQuery.data as TPreset, projectSettings)
+            : (initialConvoQuery.data as TPreset),
         modelsData: modelsQuery.data,
         keepLatestMessage: true,
       });

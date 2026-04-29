@@ -155,7 +155,10 @@ export default function useChatFunctions({
       parentMessageId = Constants.NO_PARENT;
       currentMessages = [];
       conversationId = null;
-      navigate('/c/new', { state: { focusChat: true } });
+      const projectId = searchParams.get('projectId');
+      navigate(projectId ? `/c/new?projectId=${encodeURIComponent(projectId)}` : '/c/new', {
+        state: { focusChat: true },
+      });
     }
 
     const targetParentMessageId = isRegenerate ? messageId : latestMessage?.parentMessageId;
