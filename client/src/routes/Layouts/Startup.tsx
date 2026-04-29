@@ -34,14 +34,15 @@ export default function StartupLayout({ isAuthenticated }: { isAuthenticated?: b
       const hasPendingRedirect =
         new URLSearchParams(window.location.search).has(REDIRECT_PARAM) ||
         sessionStorage.getItem(SESSION_KEY) != null;
-      if (!hasPendingRedirect) {
+      const isAuthRoute = Object.prototype.hasOwnProperty.call(headerMap, location.pathname);
+      if (isAuthRoute && !hasPendingRedirect) {
         navigate('/c/new', { replace: true });
       }
     }
     if (data) {
       setStartupConfig(data);
     }
-  }, [isAuthenticated, navigate, data]);
+  }, [isAuthenticated, navigate, data, location.pathname]);
 
   useEffect(() => {
     document.title = startupConfig?.appTitle || 'Leads Per Hour';

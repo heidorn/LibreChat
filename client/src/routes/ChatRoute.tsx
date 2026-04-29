@@ -51,7 +51,8 @@ export default function ChatRoute() {
   const index = 0;
   const [searchParams] = useSearchParams();
   const { conversationId = '' } = useParams();
-  useIdChangeEffect(conversationId);
+  const projectIdParam = searchParams.get('projectId') ?? '';
+  useIdChangeEffect(`${conversationId}:${projectIdParam}`);
   const { hasSetConversation, conversation } = store.useCreateConversationAtom(index);
   const { newConversation } = useNewConvo();
   const { showToast } = useToastContext();
@@ -65,8 +66,7 @@ export default function ChatRoute() {
     enabled:
       isAuthenticated && conversationId !== Constants.NEW_CONVO && !hasSetConversation.current,
   });
-  const projectId =
-    searchParams.get('projectId') ?? initialConvoQuery.data?.projectId ?? conversation?.projectId;
+  const projectId = projectIdParam || initialConvoQuery.data?.projectId || conversation?.projectId;
   const projectQuery = useProjectQuery(projectId);
   const projectMemoriesQuery = useProjectMemoriesQuery(projectId);
   const endpointsQuery = useGetEndpointsQuery({ enabled: isAuthenticated });
