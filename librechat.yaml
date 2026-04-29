@@ -130,13 +130,13 @@ endpoints:
       baseURL: 'https://api.deepseek.com/v1'
       models:
         default:
-          - deepseek-chat
-          - deepseek-reasoner
+          - deepseek-v4-flash
+          - deepseek-v4-pro
         fetch: true
       titleConvo: true
-      titleModel: deepseek-chat
+      titleModel: deepseek-v4-flash
       summarize: false
-      summaryModel: deepseek-chat
+      summaryModel: deepseek-v4-flash
       modelDisplayLabel: DeepSeek
       iconURL: assets/deepseek.svg
 
