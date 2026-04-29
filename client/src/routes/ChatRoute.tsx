@@ -151,17 +151,12 @@ export default function ChatRoute() {
       logger.log('conversation', 'ChatRoute, new convo effect', conversation);
       newConversation({
         modelsData: modelsQuery.data,
-        template: conversation ? conversation : undefined,
+        template: projectId ? { projectId } : undefined,
         ...(preset ? { preset } : {}),
       });
 
       hasSetConversation.current = true;
-    } else if (
-      initialConvoQuery.data &&
-      endpointsQuery.data &&
-      modelsQuery.data &&
-      projectReady
-    ) {
+    } else if (initialConvoQuery.data && endpointsQuery.data && modelsQuery.data && projectReady) {
       logger.log('conversation', 'ChatRoute initialConvoQuery', initialConvoQuery.data);
       const projectSettings = getProjectSettings(initialConvoQuery.data.promptPrefix);
       newConversation({
@@ -209,7 +204,7 @@ export default function ChatRoute() {
       logger.log('conversation', 'ChatRoute new convo, assistants effect', conversation);
       newConversation({
         modelsData: modelsQuery.data,
-        template: conversation ? conversation : undefined,
+        template: projectId ? { projectId } : undefined,
         ...(preset ? { preset } : {}),
       });
       hasSetConversation.current = true;
