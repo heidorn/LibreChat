@@ -17,7 +17,8 @@ export const useProjectsQuery = () =>
 export const useProjectQuery = (projectId?: string) =>
   useQuery([QueryKeys.project, projectId], () => dataService.getProject(projectId ?? ''), {
     enabled: !!projectId,
-    staleTime: 30000,
+    staleTime: 0,
+    refetchOnMount: 'always',
     refetchOnWindowFocus: false,
   });
 
@@ -27,7 +28,8 @@ export const useProjectConversationsQuery = (projectId?: string) =>
     () => dataService.listProjectConversations(projectId ?? ''),
     {
       enabled: !!projectId,
-      staleTime: 30000,
+      staleTime: 0,
+      refetchOnMount: 'always',
       refetchOnWindowFocus: false,
     },
   );
@@ -38,7 +40,8 @@ export const useProjectMemoriesQuery = (projectId?: string) =>
     () => dataService.listProjectMemories(projectId ?? ''),
     {
       enabled: !!projectId,
-      staleTime: 30000,
+      staleTime: 0,
+      refetchOnMount: 'always',
       refetchOnWindowFocus: false,
     },
   );

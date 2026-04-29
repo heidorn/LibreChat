@@ -180,11 +180,12 @@ export function createProjectMethods(mongoose: typeof import('mongoose')) {
     const Conversation = mongoose.models.Conversation as Model<IConversation>;
     const links = await ProjectConversation.find({ projectId }).sort({ lastActivityAt: -1 }).lean();
     const conversationIds = links.map((link) => link.conversationId);
-    if (conversationIds.length === 0) {
-      return [];
-    }
+    const linkedOrTaggedQuery =
+      conversationIds.length > 0
+        ? { $or: [{ conversationId: { $in: conversationIds } }, { projectId }] }
+        : { projectId };
 
-    return await Conversation.find({ user: userId, conversationId: { $in: conversationIds } })
+    return await Conversation.find({ user: userId, ...linkedOrTaggedQuery })
       .sort({ updatedAt: -1 })
       .lean();
   }
