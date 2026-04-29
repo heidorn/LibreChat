@@ -18,7 +18,10 @@ type ProjectInput = {
 };
 
 type ProjectUpdate = Partial<
-  Pick<IProject, 'name' | 'description' | 'instructions' | 'visibility' | 'defaultModel' | 'defaultAgentId'>
+  Pick<
+    IProject,
+    'name' | 'description' | 'instructions' | 'visibility' | 'defaultModel' | 'defaultAgentId'
+  >
 >;
 
 type ProjectLinkInput = {
@@ -127,7 +130,8 @@ export function createProjectMethods(mongoose: typeof import('mongoose')) {
     }
 
     const ProjectConversation = getProjectConversationModel();
-    return await ProjectConversation.findOneAndUpdate(
+    const Conversation = mongoose.models.Conversation as Model<IConversation>;
+    const link = await ProjectConversation.findOneAndUpdate(
       { projectId: input.projectId, conversationId: input.conversationId },
       {
         projectId: input.projectId,
@@ -139,16 +143,31 @@ export function createProjectMethods(mongoose: typeof import('mongoose')) {
       },
       { new: true, upsert: true },
     ).lean();
+    await Conversation.findOneAndUpdate(
+      { user: userId, conversationId: input.conversationId },
+      { projectId: input.projectId },
+    );
+    return link;
   }
 
-  async function unlinkProjectConversation(userId: string, projectId: string, conversationId: string) {
+  async function unlinkProjectConversation(
+    userId: string,
+    projectId: string,
+    conversationId: string,
+  ) {
     const project = await getProject(userId, projectId);
     if (!project) {
       throw new Error('Project not found');
     }
 
     const ProjectConversation = getProjectConversationModel();
-    return await ProjectConversation.findOneAndDelete({ projectId, conversationId }).lean();
+    const Conversation = mongoose.models.Conversation as Model<IConversation>;
+    const link = await ProjectConversation.findOneAndDelete({ projectId, conversationId }).lean();
+    await Conversation.findOneAndUpdate(
+      { user: userId, conversationId },
+      { $unset: { projectId: 1 } },
+    );
+    return link;
   }
 
   async function getProjectConversations(userId: string, projectId: string) {

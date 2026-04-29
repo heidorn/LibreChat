@@ -1,4 +1,5 @@
 import { useState, useId, useRef, memo, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import * as Ariakit from '@ariakit/react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { QueryKeys } from 'librechat-data-provider';
@@ -359,6 +360,94 @@ function ConvoOptions({
     );
   }
 
+  const addToProjectDialog =
+    showAddToProjectDialog &&
+    createPortal(
+      <div
+        className="fixed inset-0 z-[140] flex items-center justify-center bg-black/60 px-4"
+        onClick={() => setShowAddToProjectDialog(false)}
+      >
+        <div
+          className="w-full max-w-md rounded-xl border border-border-light bg-surface-primary p-5 shadow-2xl"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <h2 className="mb-4 text-lg font-semibold text-text-primary">Adicionar ao projeto</h2>
+          <select
+            className="h-11 w-full rounded-lg border border-border-light bg-surface-secondary px-3 text-sm text-text-primary outline-none"
+            value={selectedProjectId}
+            onChange={(event) => setSelectedProjectId(event.target.value)}
+          >
+            <option value="">Escolha um projeto</option>
+            {(projectsQuery.data?.projects ?? []).map((project) => (
+              <option key={project.projectId} value={project.projectId}>
+                {project.name}
+              </option>
+            ))}
+          </select>
+          <div className="mt-5 flex justify-end gap-2">
+            <button
+              type="button"
+              className="rounded-full px-4 py-2 text-sm text-text-secondary hover:bg-surface-active-alt"
+              onClick={() => setShowAddToProjectDialog(false)}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              className="rounded-full bg-text-primary px-5 py-2 text-sm font-medium text-surface-primary disabled:opacity-50"
+              disabled={!selectedProjectId || linkProjectConversation.isLoading}
+              onClick={handleAddToProject}
+            >
+              Adicionar
+            </button>
+          </div>
+        </div>
+      </div>,
+      document.body,
+    );
+
+  const createProjectDialog =
+    showCreateProjectDialog &&
+    createPortal(
+      <div
+        className="fixed inset-0 z-[140] flex items-center justify-center bg-black/60 px-4"
+        onClick={() => setShowCreateProjectDialog(false)}
+      >
+        <div
+          className="w-full max-w-md rounded-xl border border-border-light bg-surface-primary p-5 shadow-2xl"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <h2 className="mb-4 text-lg font-semibold text-text-primary">
+            Criar projeto com esta conversa
+          </h2>
+          <input
+            className="h-11 w-full rounded-lg border border-border-light bg-surface-secondary px-3 text-sm text-text-primary outline-none"
+            value={newProjectName}
+            placeholder="Nome do projeto"
+            onChange={(event) => setNewProjectName(event.target.value)}
+          />
+          <div className="mt-5 flex justify-end gap-2">
+            <button
+              type="button"
+              className="rounded-full px-4 py-2 text-sm text-text-secondary hover:bg-surface-active-alt"
+              onClick={() => setShowCreateProjectDialog(false)}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              className="rounded-full bg-text-primary px-5 py-2 text-sm font-medium text-surface-primary disabled:opacity-50"
+              disabled={!newProjectName.trim() || createProjectFromConversation.isLoading}
+              onClick={handleCreateProjectFromConversation}
+            >
+              Criar projeto
+            </button>
+          </div>
+        </div>
+      </div>,
+      document.body,
+    );
+
   return (
     <>
       <span className="sr-only" aria-live="polite" aria-atomic="true">
@@ -416,74 +505,8 @@ function ConvoOptions({
           setShowDeleteDialog={setShowDeleteDialog}
         />
       )}
-      {showAddToProjectDialog && (
-        <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/60 px-4">
-          <div className="w-full max-w-md rounded-xl border border-border-light bg-surface-primary p-5 shadow-2xl">
-            <h2 className="mb-4 text-lg font-semibold text-text-primary">Adicionar ao projeto</h2>
-            <select
-              className="h-11 w-full rounded-lg border border-border-light bg-surface-secondary px-3 text-sm text-text-primary outline-none"
-              value={selectedProjectId}
-              onChange={(event) => setSelectedProjectId(event.target.value)}
-            >
-              <option value="">Escolha um projeto</option>
-              {(projectsQuery.data?.projects ?? []).map((project) => (
-                <option key={project.projectId} value={project.projectId}>
-                  {project.name}
-                </option>
-              ))}
-            </select>
-            <div className="mt-5 flex justify-end gap-2">
-              <button
-                type="button"
-                className="rounded-full px-4 py-2 text-sm text-text-secondary hover:bg-surface-active-alt"
-                onClick={() => setShowAddToProjectDialog(false)}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="rounded-full bg-text-primary px-5 py-2 text-sm font-medium text-surface-primary disabled:opacity-50"
-                disabled={!selectedProjectId || linkProjectConversation.isLoading}
-                onClick={handleAddToProject}
-              >
-                Adicionar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-      {showCreateProjectDialog && (
-        <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/60 px-4">
-          <div className="w-full max-w-md rounded-xl border border-border-light bg-surface-primary p-5 shadow-2xl">
-            <h2 className="mb-4 text-lg font-semibold text-text-primary">
-              Criar projeto com esta conversa
-            </h2>
-            <input
-              className="h-11 w-full rounded-lg border border-border-light bg-surface-secondary px-3 text-sm text-text-primary outline-none"
-              value={newProjectName}
-              placeholder="Nome do projeto"
-              onChange={(event) => setNewProjectName(event.target.value)}
-            />
-            <div className="mt-5 flex justify-end gap-2">
-              <button
-                type="button"
-                className="rounded-full px-4 py-2 text-sm text-text-secondary hover:bg-surface-active-alt"
-                onClick={() => setShowCreateProjectDialog(false)}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                className="rounded-full bg-text-primary px-5 py-2 text-sm font-medium text-surface-primary disabled:opacity-50"
-                disabled={!newProjectName.trim() || createProjectFromConversation.isLoading}
-                onClick={handleCreateProjectFromConversation}
-              >
-                Criar projeto
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {addToProjectDialog}
+      {createProjectDialog}
     </>
   );
 }

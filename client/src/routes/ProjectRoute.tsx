@@ -140,7 +140,13 @@ export default function ProjectRoute() {
                   key={conversation.conversationId}
                   type="button"
                   className="flex w-full items-center justify-between rounded-lg border border-border-light bg-surface-secondary px-4 py-3 text-left hover:bg-surface-active-alt"
-                  onClick={() => navigate(`/c/${conversation.conversationId}`)}
+                  onClick={() =>
+                    navigate(
+                      `/c/${conversation.conversationId}?projectId=${encodeURIComponent(
+                        project.projectId,
+                      )}`,
+                    )
+                  }
                 >
                   <span className="truncate text-sm font-medium">
                     {conversation.title || 'Nova conversa'}

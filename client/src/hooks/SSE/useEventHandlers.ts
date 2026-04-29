@@ -482,6 +482,7 @@ export default function useEventHandlers({
         announcePolite({ message: getAllContentText(responseMessage) });
 
         const isNewConvo = conversation.conversationId !== submissionConvo.conversationId;
+        const projectId = submissionConvo.projectId;
 
         if (isNewConvo && conversation.conversationId) {
           queueTitleGeneration(conversation.conversationId);
@@ -597,6 +598,9 @@ export default function useEventHandlers({
               queryKey: [QueryKeys.allConversations],
               refetchPage: (_, index) => index === 0,
             });
+            if (projectId) {
+              queryClient.invalidateQueries([QueryKeys.projectConversations, projectId]);
+            }
           }
 
           if (conversation.conversationId && submission.ephemeralAgent) {
@@ -610,7 +614,10 @@ export default function useEventHandlers({
           }
 
           if (location.pathname === `/c/${Constants.NEW_CONVO}`) {
-            navigate(`/c/${conversation.conversationId}`, { replace: true });
+            const nextPath = projectId
+              ? `/c/${conversation.conversationId}?projectId=${encodeURIComponent(projectId)}`
+              : `/c/${conversation.conversationId}`;
+            navigate(nextPath, { replace: true });
           }
         }
       } finally {
