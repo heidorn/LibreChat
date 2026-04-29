@@ -35,6 +35,14 @@ const useNavigateToConvo = (index = 0) => {
   const clearAllLatestMessages = store.useClearLatestMessages(`useNavigateToConvo ${index}`);
   const { hasSetConversation, setConversation: setConvo } = store.useCreateConversationAtom(index);
 
+  const buildConversationPath = useCallback(
+    (conversationId?: string | null, projectId?: string | null) => {
+      const path = `/c/${conversationId ?? Constants.NEW_CONVO}`;
+      return projectId ? `${path}?projectId=${encodeURIComponent(projectId)}` : path;
+    },
+    [],
+  );
+
   const setConversation = useCallback(
     (conversation: TConversation) => {
       setConvo(conversation);
@@ -66,12 +74,19 @@ const useNavigateToConvo = (index = 0) => {
       const convoData = { ...data };
       clearModelForNonEphemeralAgent(convoData);
       setConversation(convoData);
-      navigate(`/c/${conversationId ?? Constants.NEW_CONVO}`, { state: { focusChat: true } });
+      navigate(
+        buildConversationPath(conversationId, convoData.projectId ?? conversation?.projectId),
+        {
+          state: { focusChat: true },
+        },
+      );
     } catch (error) {
       console.error('Error fetching conversation data on navigation', error);
       if (conversation) {
         setConversation(conversation as TConversation);
-        navigate(`/c/${conversationId}`, { state: { focusChat: true } });
+        navigate(buildConversationPath(conversationId, conversation.projectId), {
+          state: { focusChat: true },
+        });
       }
     }
   };
@@ -129,7 +144,9 @@ const useNavigateToConvo = (index = 0) => {
       fetchFreshData(convo);
     } else {
       setConversation(convo);
-      navigate(`/c/${convo.conversationId ?? Constants.NEW_CONVO}`, { state: { focusChat: true } });
+      navigate(buildConversationPath(convo.conversationId, convo.projectId), {
+        state: { focusChat: true },
+      });
     }
   };
 

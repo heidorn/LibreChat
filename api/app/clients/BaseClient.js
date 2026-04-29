@@ -812,12 +812,21 @@ class BaseClient {
       }
     }
 
+    for (const key of Object.keys(fieldsToKeep)) {
+      delete unsetFields[key];
+    }
+
     const conversation = await db.saveConvo(reqCtx, fieldsToKeep, {
       context: 'api/app/clients/BaseClient.js - saveMessageToDatabase #saveConvo',
       unsetFields,
     });
 
     if (options.req?.body?.projectId && message.conversationId) {
+      logger.info('[Projects] Linking conversation created inside project', {
+        projectId: options.req.body.projectId,
+        conversationId: message.conversationId,
+        userId: reqCtx.userId,
+      });
       await db.linkProjectConversation(reqCtx.userId, {
         projectId: options.req.body.projectId,
         conversationId: message.conversationId,

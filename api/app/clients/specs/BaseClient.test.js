@@ -25,6 +25,7 @@ jest.mock('~/models', () => ({
   getConvo: jest.fn(),
   saveConvo: jest.fn(),
   deleteConvos: jest.fn(),
+  linkProjectConversation: jest.fn(),
   getPreset: jest.fn(),
   getPresets: jest.fn(),
   savePreset: jest.fn(),
@@ -38,7 +39,7 @@ jest.mock('~/models', () => ({
   updateFileUsage: jest.fn(),
 }));
 
-const { getConvo, saveConvo, saveMessage } = require('~/models');
+const { getConvo, saveConvo, saveMessage, linkProjectConversation } = require('~/models');
 
 jest.mock('@librechat/agents', () => {
   const actual = jest.requireActual('@librechat/agents');
@@ -874,6 +875,50 @@ describe('BaseClient', () => {
 
       const secondSaveConvoCall = saveConvo.mock.calls[1];
       expect(secondSaveConvoCall[2]).toHaveProperty('unsetFields', {});
+    });
+
+    test('should not unset projectId when linking an existing conversation to a project', async () => {
+      jest.clearAllMocks();
+      const existingConvo = {
+        conversationId: 'existing-project-convo-id',
+        endpoint: 'openai',
+        endpointType: 'openai',
+        model: 'gpt-4o-mini',
+        projectId: 'old-project-id',
+      };
+      const user = { id: 'user-id' };
+
+      getConvo.mockResolvedValue(existingConvo);
+      saveConvo.mockResolvedValue(existingConvo);
+      linkProjectConversation.mockResolvedValue({});
+
+      TestClient = initializeFakeClient(
+        apiKey,
+        {
+          ...options,
+          req: {
+            user,
+            body: {
+              projectId: 'new-project-id',
+            },
+          },
+        },
+        [],
+      );
+
+      await TestClient.sendMessage('Message inside a project', {
+        user,
+        conversationId: existingConvo.conversationId,
+      });
+
+      const [, savedFields, saveOptions] = saveConvo.mock.calls[0];
+      expect(savedFields).toHaveProperty('projectId', 'new-project-id');
+      expect(saveOptions.unsetFields).not.toHaveProperty('projectId');
+      expect(linkProjectConversation).toHaveBeenCalledWith(user.id, {
+        projectId: 'new-project-id',
+        conversationId: existingConvo.conversationId,
+        addedFrom: 'created_inside_project',
+      });
     });
 
     test('sendCompletion is called with the correct arguments', async () => {
