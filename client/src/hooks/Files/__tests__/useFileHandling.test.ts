@@ -1,5 +1,10 @@
 import { renderHook, act } from '@testing-library/react';
-import { Constants, EModelEndpoint, getEndpointFileConfig } from 'librechat-data-provider';
+import {
+  Constants,
+  EModelEndpoint,
+  EToolResources,
+  getEndpointFileConfig,
+} from 'librechat-data-provider';
 
 beforeAll(() => {
   global.URL.createObjectURL = jest.fn(() => 'blob:mock-url');
@@ -284,6 +289,52 @@ describe('useFileHandling', () => {
       expect(mockMutate).toHaveBeenCalledTimes(1);
       const formData: FormData = mockMutate.mock.calls[0][0];
       expect(formData.get('endpoint')).toBe('default');
+    });
+
+    it('uploads DOCX message attachments as text context', async () => {
+      mockConversation = {
+        conversationId: 'convo-1',
+        endpoint: 'openAI',
+        endpointType: 'openAI',
+      };
+
+      const useFileHandling = await loadHook();
+      const { result } = renderHook(() => useFileHandling());
+
+      const docxFile = new File(['hello'], 'briefing.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      });
+
+      await act(async () => {
+        await result.current.handleFiles([docxFile]);
+      });
+
+      expect(mockMutate).toHaveBeenCalledTimes(1);
+      const formData: FormData = mockMutate.mock.calls[0][0];
+      expect(formData.get('message_file')).toBe('true');
+      expect(formData.get('tool_resource')).toBe(EToolResources.context);
+    });
+
+    it('keeps PDFs on the provider upload path', async () => {
+      mockConversation = {
+        conversationId: 'convo-1',
+        endpoint: 'openAI',
+        endpointType: 'openAI',
+      };
+
+      const useFileHandling = await loadHook();
+      const { result } = renderHook(() => useFileHandling());
+
+      const pdfFile = new File(['%PDF'], 'proposal.pdf', { type: 'application/pdf' });
+
+      await act(async () => {
+        await result.current.handleFiles([pdfFile]);
+      });
+
+      expect(mockMutate).toHaveBeenCalledTimes(1);
+      const formData: FormData = mockMutate.mock.calls[0][0];
+      expect(formData.get('message_file')).toBe('true');
+      expect(formData.get('tool_resource')).toBeNull();
     });
   });
 });

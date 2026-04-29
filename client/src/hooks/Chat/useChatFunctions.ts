@@ -33,6 +33,7 @@ import store, { useGetEphemeralAgent } from '~/store';
 import { startupConfigKey } from '~/data-provider';
 import useUserKey from '~/hooks/Input/useUserKey';
 import { useAuthContext } from '~/hooks';
+import { clearPendingProjectChat, getPendingProjectChatTag, isProjectTag } from '~/utils/projects';
 
 const logChatRequest = (request: Record<string, unknown>) => {
   logger.log('=====================================\nAsk function called with:');
@@ -105,6 +106,10 @@ export default function useChatFunctions({
     }
 
     const conversation = cloneDeep(immutableConversation);
+    const pendingProjectTag = getPendingProjectChatTag();
+    if (conversation && isProjectTag(pendingProjectTag)) {
+      conversation.tags = Array.from(new Set([...(conversation.tags ?? []), pendingProjectTag]));
+    }
 
     const endpoint = conversation?.endpoint;
     if (endpoint === null) {
@@ -344,6 +349,9 @@ export default function useChatFunctions({
     }
 
     setSubmission(submission);
+    if (isProjectTag(pendingProjectTag)) {
+      clearPendingProjectChat();
+    }
     logger.dir('message_stream', submission, { depth: null });
   };
 

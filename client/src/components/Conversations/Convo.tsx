@@ -167,6 +167,7 @@ export default function Conversation({
   };
 
   const convoOptionsProps = {
+    conversation,
     title,
     retainView,
     renameHandler: handleRename,

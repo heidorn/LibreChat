@@ -255,6 +255,9 @@ const ResumableAgentController = async (req, res, next, initializeClient, addTit
 
         const { conversation: convoData = {} } = await databasePromise;
         const conversation = { ...convoData };
+        if (Array.isArray(req.body.tags) && req.body.tags.length > 0) {
+          conversation.tags = req.body.tags;
+        }
         conversation.title =
           conversation && !conversation.title ? null : conversation?.title || 'New Chat';
 

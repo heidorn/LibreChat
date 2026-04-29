@@ -12,7 +12,7 @@ interface:
     create: false
     share: false
     public: false
-  bookmarks: false
+  bookmarks: true
   memories: true
   multiConvo: true
   agents:
@@ -54,6 +54,8 @@ endpoints:
   anthropic:
     titleConvo: true
     titleModel: claude-haiku-4-5-20251001
+    dropParams:
+      - temperature
   google:
     titleConvo: true
     titleModel: gemini-2.5-flash
@@ -111,7 +113,7 @@ endpoints:
           - sonar
           - sonar-pro
           - sonar-reasoning
-        fetch: true
+        fetch: false
       titleConvo: true
       titleModel: sonar
       summarize: false

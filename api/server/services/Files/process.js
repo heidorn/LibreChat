@@ -60,6 +60,14 @@ const createSanitizedUploadWrapper = (uploadFunction) => {
   };
 };
 
+const shouldParseMessageAttachmentAsText = (mimetype) => {
+  if (!mimetype || mimetype === 'application/pdf') {
+    return false;
+  }
+
+  return documentParserMimeTypes.some((regex) => regex.test(mimetype));
+};
+
 /**
  * Enqueues the delete operation to the leaky bucket queue if necessary, or adds it directly to promises.
  *
@@ -477,9 +485,13 @@ const processFileUpload = async ({ req, res, metadata }) => {
 const processAgentFileUpload = async ({ req, res, metadata }) => {
   const { file } = req;
   const appConfig = req.config;
-  const { agent_id, tool_resource, file_id, temp_file_id = null } = metadata;
+  const { agent_id, file_id, temp_file_id = null } = metadata;
+  let { tool_resource } = metadata;
 
   let messageAttachment = !!metadata.message_file;
+  if (messageAttachment && !tool_resource && shouldParseMessageAttachmentAsText(file.mimetype)) {
+    tool_resource = EToolResources.context;
+  }
 
   if (agent_id && !tool_resource && !messageAttachment) {
     throw new Error('No tool resource provided for agent file upload');

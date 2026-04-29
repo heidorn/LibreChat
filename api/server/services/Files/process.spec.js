@@ -107,6 +107,11 @@ const makeMetadata = () => ({
   file_id: 'file-uuid-123',
 });
 
+const makeMessageAttachmentMetadata = () => ({
+  message_file: 'true',
+  file_id: 'file-uuid-123',
+});
+
 const mockRes = {
   status: jest.fn().mockReturnThis(),
   json: jest.fn().mockReturnValue({}),
@@ -339,6 +344,47 @@ describe('processAgentFileUpload', () => {
       await expect(
         processAgentFileUpload({ req, res: mockRes, metadata: makeMetadata() }),
       ).resolves.not.toThrow();
+    });
+  });
+
+  describe('message attachments', () => {
+    test('routes DOCX message attachments through document_parser text context', async () => {
+      const req = makeReq({ mimetype: DOCX_MIME, ocrConfig: null });
+
+      await processAgentFileUpload({
+        req,
+        res: mockRes,
+        metadata: makeMessageAttachmentMetadata(),
+      });
+
+      expect(getStrategyFunctions).toHaveBeenCalledWith(FileSources.document_parser);
+      expect(require('~/models').createFile).toHaveBeenCalledWith(
+        expect.objectContaining({
+          source: FileSources.text,
+          context: 'message_attachment',
+          text: 'extracted text',
+        }),
+        true,
+      );
+    });
+
+    test('keeps PDF message attachments on the standard upload path', async () => {
+      const handleFileUpload = jest.fn().mockResolvedValue({
+        bytes: 42,
+        filename: 'upload.pdf',
+        filepath: '/uploads/upload.pdf',
+      });
+      getStrategyFunctions.mockReturnValue({ handleFileUpload });
+      const req = makeReq({ mimetype: PDF_MIME, ocrConfig: null });
+
+      await processAgentFileUpload({
+        req,
+        res: mockRes,
+        metadata: makeMessageAttachmentMetadata(),
+      });
+
+      expect(getStrategyFunctions).not.toHaveBeenCalledWith(FileSources.document_parser);
+      expect(handleFileUpload).toHaveBeenCalled();
     });
   });
 });

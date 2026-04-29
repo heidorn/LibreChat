@@ -6,7 +6,6 @@ import ModelSelector from './Menus/Endpoints/ModelSelector';
 import { useGetStartupConfig } from '~/data-provider';
 import ExportAndShareMenu from './ExportAndShareMenu';
 import { OpenSidebar, PresetsMenu } from './Menus';
-import BookmarkMenu from './Menus/BookmarkMenu';
 import { TemporaryChat } from './TemporaryChat';
 import AddMultiConvo from './AddMultiConvo';
 import { useHasAccess } from '~/hooks';
@@ -23,11 +22,6 @@ function Header() {
     () => startupConfig?.interface ?? defaultInterface,
     [startupConfig],
   );
-
-  const hasAccessToBookmarks = useHasAccess({
-    permissionType: PermissionTypes.BOOKMARKS,
-    permission: Permissions.USE,
-  });
 
   const hasAccessToMultiConvo = useHasAccess({
     permissionType: PermissionTypes.MULTI_CONVO,
@@ -55,7 +49,6 @@ function Header() {
             >
               <ModelSelector startupConfig={startupConfig} />
               {interfaceConfig.presets === true && interfaceConfig.modelSelect && <PresetsMenu />}
-              {hasAccessToBookmarks === true && <BookmarkMenu />}
               {hasAccessToMultiConvo === true && <AddMultiConvo />}
               {isSmallScreen && (
                 <>

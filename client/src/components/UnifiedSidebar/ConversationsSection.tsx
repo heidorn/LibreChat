@@ -3,6 +3,7 @@ import { useSetRecoilState, useRecoilValue } from 'recoil';
 import { useMediaQuery } from '@librechat/client';
 import { PermissionTypes, Permissions } from 'librechat-data-provider';
 import { Folder, MoreHorizontal, Plus, Search, SquarePen, X } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import type { InfiniteQueryObserverResult } from '@tanstack/react-query';
 import type { ConversationListResponse } from 'librechat-data-provider';
 import type { List } from 'react-virtualized';
@@ -17,29 +18,23 @@ import {
 import { useConversationsInfiniteQuery, useTitleGeneration } from '~/data-provider';
 import { Conversations } from '~/components/Conversations';
 import SearchBar from '~/components/Nav/SearchBar';
+import {
+  createProjectId,
+  getAllProjects,
+  getProjectTag,
+  saveStoredProjects,
+  setPendingProjectChat,
+  type LphProject,
+} from '~/utils/projects';
 import store from '~/store';
 
 const BookmarkNav = lazy(() => import('~/components/Nav/Bookmarks/BookmarkNav'));
 const AccountSettings = lazy(() => import('~/components/Nav/AccountSettings'));
 
-type LocalProject = {
-  id: string;
-  name: string;
-};
-
-const defaultProjectNames = [
-  'Projeto 01',
-  'Projeto 02',
-  'Projeto 03',
-  'Projeto 04',
-  'Projeto 05',
-  'Projeto 06',
-];
-
-const projectsStorageKey = 'lph.sidebar.projects';
-
 const ConversationsSection = memo(() => {
   const localize = useLocalize();
+  const navigate = useNavigate();
+  const location = useLocation();
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
   const setSidebarExpanded = useSetRecoilState(store.sidebarExpanded);
   const { isAuthenticated } = useAuthContext();
@@ -51,17 +46,7 @@ const ConversationsSection = memo(() => {
   const [tags, setTags] = useState<string[]>([]);
   const [projectName, setProjectName] = useState('');
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-  const [localProjects, setLocalProjects] = useState<LocalProject[]>(() => {
-    if (typeof window === 'undefined') {
-      return [];
-    }
-    try {
-      const storedProjects = window.localStorage.getItem(projectsStorageKey);
-      return storedProjects ? JSON.parse(storedProjects) : [];
-    } catch {
-      return [];
-    }
-  });
+  const [projects, setProjects] = useState<LphProject[]>(() => getAllProjects());
 
   const hasAccessToBookmarks = useHasAccess({
     permissionType: PermissionTypes.BOOKMARKS,
@@ -108,25 +93,25 @@ const ConversationsSection = memo(() => {
     return data ? data.pages.flatMap((page) => page.conversations) : [];
   }, [data]);
 
-  const visibleProjects = useMemo(() => {
-    const savedNames = new Set(localProjects.map((project) => project.name));
-    const fallbackProjects = defaultProjectNames
-      .filter((project) => !savedNames.has(project))
-      .map((name, index) => ({ id: `default-${index}`, name }));
-    return [...localProjects, ...fallbackProjects].slice(0, 6);
-  }, [localProjects]);
+  const activeProjectId = useMemo(() => {
+    const match = location.pathname.match(/^\/projects\/([^/]+)/);
+    return match?.[1] ?? null;
+  }, [location.pathname]);
 
-  const hiddenProjects = useMemo(() => {
-    const savedNames = new Set(localProjects.map((project) => project.name));
-    const fallbackProjects = defaultProjectNames
-      .filter((project) => !savedNames.has(project))
-      .map((name, index) => ({ id: `hidden-default-${index}`, name }));
-    return [...localProjects, ...fallbackProjects].slice(6);
-  }, [localProjects]);
+  const visibleProjects = useMemo(() => projects.slice(0, 6), [projects]);
+  const hiddenProjects = useMemo(() => projects.slice(6), [projects]);
 
   useEffect(() => {
-    window.localStorage.setItem(projectsStorageKey, JSON.stringify(localProjects));
-  }, [localProjects]);
+    if (activeProjectId) {
+      setTags([getProjectTag(activeProjectId)]);
+      return;
+    }
+    setTags([]);
+  }, [activeProjectId]);
+
+  useEffect(() => {
+    setProjects(getAllProjects());
+  }, [isProjectModalOpen, location.pathname]);
 
   const createProject = useCallback(() => {
     const nextName = projectName.trim();
@@ -134,13 +119,21 @@ const ConversationsSection = memo(() => {
       return;
     }
 
-    setLocalProjects((projects) => [
-      { id: `${Date.now()}`, name: nextName },
+    const newProject = {
+      id: createProjectId(nextName),
+      name: nextName,
+      createdAt: new Date().toISOString(),
+    };
+    const nextProjects = [
+      newProject,
       ...projects.filter((project) => project.name.toLowerCase() !== nextName.toLowerCase()),
-    ]);
+    ];
+    saveStoredProjects(nextProjects);
+    setProjects(getAllProjects());
     setProjectName('');
     setIsProjectModalOpen(false);
-  }, [projectName]);
+    navigate(`/projects/${newProject.id}`);
+  }, [navigate, projectName, projects]);
 
   const toggleNav = useCallback(() => {
     if (isSmallScreen) {
@@ -154,6 +147,32 @@ const ConversationsSection = memo(() => {
     }
     fetchNextPage();
   }, [isFetchingNextPage, computedHasNextPage, fetchNextPage]);
+
+  const openProject = useCallback(
+    (project: LphProject) => {
+      setTags([getProjectTag(project.id)]);
+      toggleNav();
+      navigate(`/projects/${project.id}`);
+    },
+    [navigate, toggleNav],
+  );
+
+  const startNewChat = useCallback(() => {
+    if (!activeProjectId) {
+      newConversation();
+      return;
+    }
+
+    const project = projects.find((item) => item.id === activeProjectId);
+    if (project) {
+      setPendingProjectChat(project);
+    }
+    const params = new URLSearchParams({
+      projectTag: getProjectTag(activeProjectId),
+      projectName: project?.name ?? 'Projeto',
+    });
+    navigate(`/c/new?${params.toString()}`);
+  }, [activeProjectId, navigate, newConversation, projects]);
 
   const [isSearchLoading, setIsSearchLoading] = useState(
     !!search.query && (search.isTyping || isLoading || isFetching),
@@ -187,10 +206,10 @@ const ConversationsSection = memo(() => {
       <button
         type="button"
         className="mb-2 flex h-10 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium text-text-primary hover:bg-surface-active-alt"
-        onClick={() => newConversation()}
+        onClick={startNewChat}
       >
         <SquarePen className="h-5 w-5" aria-hidden="true" />
-        Novo chat
+        {activeProjectId ? 'Novo chat neste projeto' : 'Novo chat'}
       </button>
 
       <div className="mb-5 flex items-center gap-2 rounded-lg px-2 text-sm text-text-primary hover:bg-surface-active-alt">
@@ -221,7 +240,10 @@ const ConversationsSection = memo(() => {
             <button
               key={project.id}
               type="button"
-              className="flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm text-text-primary hover:bg-surface-active-alt"
+              className={`flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm text-text-primary hover:bg-surface-active-alt ${
+                activeProjectId === project.id ? 'bg-surface-active-alt' : ''
+              }`}
+              onClick={() => openProject(project)}
             >
               <Folder className="h-4 w-4 shrink-0" aria-hidden="true" />
               <span className="truncate">{project.name}</span>
@@ -230,6 +252,7 @@ const ConversationsSection = memo(() => {
           <button
             type="button"
             className="flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm text-text-primary hover:bg-surface-active-alt"
+            onClick={() => setProjects(getAllProjects())}
           >
             <MoreHorizontal className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>Mais</span>
@@ -305,8 +328,8 @@ const ConversationsSection = memo(() => {
               autoFocus
             />
             <p className="mb-5 text-sm text-text-secondary">
-              Esta primeira versão organiza projetos na sidebar. Na próxima fase, conectamos ao banco
-              para vincular chats, arquivos e memórias.
+              O projeto organiza conversas em um contexto separado. Você pode entrar nele,
+              iniciar novos chats e adicionar conversas existentes pelo menu de três pontinhos.
             </p>
             <div className="flex justify-end">
               <button

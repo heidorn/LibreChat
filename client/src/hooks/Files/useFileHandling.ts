@@ -7,6 +7,7 @@ import {
   QueryKeys,
   Constants,
   EToolResources,
+  documentParserMimeTypes,
   mergeFileConfig,
   isAssistantsEndpoint,
   getEndpointFileConfig,
@@ -44,6 +45,14 @@ export type FileHandlingState = {
 };
 
 const noop = () => {};
+
+const shouldUploadAsTextContext = (mimeType?: string) => {
+  if (!mimeType || mimeType === 'application/pdf') {
+    return false;
+  }
+
+  return documentParserMimeTypes.some((regex) => regex.test(mimeType));
+};
 
 const useFileHandlingCore = (params: UseFileHandling | undefined, fileState: FileHandlingState) => {
   const localize = useLocalize();
@@ -215,7 +224,9 @@ const useFileHandlingCore = (params: UseFileHandling | undefined, fileState: Fil
       if (!agent_id) {
         formData.append('message_file', 'true');
       }
-      const tool_resource = extendedFile.tool_resource;
+      const tool_resource =
+        extendedFile.tool_resource ??
+        (shouldUploadAsTextContext(extendedFile.type) ? EToolResources.context : undefined);
       if (tool_resource != null) {
         formData.append('tool_resource', tool_resource);
       }
