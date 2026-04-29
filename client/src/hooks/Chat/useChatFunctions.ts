@@ -128,6 +128,11 @@ export default function useChatFunctions({
     const isEditOrContinue = isEdited || isContinued;
 
     let currentMessages: TMessage[] | null = overrideMessages ?? getMessages() ?? [];
+    const activeProjectId = searchParams.get('projectId') ?? conversation?.projectId;
+
+    if (activeProjectId) {
+      conversation.projectId = activeProjectId;
+    }
 
     if (conversation?.promptPrefix) {
       conversation.promptPrefix = replaceSpecialVars({
@@ -155,10 +160,12 @@ export default function useChatFunctions({
       parentMessageId = Constants.NO_PARENT;
       currentMessages = [];
       conversationId = null;
-      const projectId = searchParams.get('projectId');
-      navigate(projectId ? `/c/new?projectId=${encodeURIComponent(projectId)}` : '/c/new', {
-        state: { focusChat: true },
-      });
+      navigate(
+        activeProjectId ? `/c/new?projectId=${encodeURIComponent(activeProjectId)}` : '/c/new',
+        {
+          state: { focusChat: true },
+        },
+      );
     }
 
     const targetParentMessageId = isRegenerate ? messageId : latestMessage?.parentMessageId;
@@ -320,7 +327,7 @@ export default function useChatFunctions({
       conversation: {
         ...conversation,
         conversationId,
-        projectId: searchParams.get('projectId') ?? conversation?.projectId,
+        ...(activeProjectId ? { projectId: activeProjectId } : {}),
       },
       endpointOption,
       userMessage: {

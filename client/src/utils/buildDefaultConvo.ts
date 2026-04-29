@@ -61,6 +61,14 @@ const buildDefaultConvo = ({
     endpoint,
   };
 
+  if (conversation.projectId) {
+    defaultConvo.projectId = conversation.projectId;
+  }
+
+  if (conversation.projectId && conversation.promptPrefix) {
+    defaultConvo.promptPrefix = conversation.promptPrefix;
+  }
+
   // Ensures assistant_id is always defined
   const assistantId = convo?.assistant_id ?? conversation?.assistant_id ?? '';
   const defaultAssistantId = lastConversationSetup?.assistant_id ?? '';
