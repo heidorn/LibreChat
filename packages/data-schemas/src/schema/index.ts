@@ -15,6 +15,14 @@ export { default as pluginAuthSchema } from './pluginAuth';
 export { default as presetSchema } from './preset';
 export { default as promptSchema } from './prompt';
 export { default as promptGroupSchema } from './promptGroup';
+export {
+  projectAgentSchema,
+  projectArtifactSchema,
+  projectConversationSchema,
+  projectFileSchema,
+  projectMemorySchema,
+  projectSchema,
+} from './project';
 export { default as roleSchema } from './role';
 export { default as sessionSchema } from './session';
 export { default as shareSchema } from './share';

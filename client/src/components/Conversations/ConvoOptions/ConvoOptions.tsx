@@ -4,12 +4,15 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { QueryKeys } from 'librechat-data-provider';
 import { useQueryClient } from '@tanstack/react-query';
 import { DropdownPopup, Spinner, useToastContext } from '@librechat/client';
-import { Ellipsis, Share2, CopyPlus, Archive, Pen, Trash } from 'lucide-react';
+import { Ellipsis, Share2, CopyPlus, Archive, Pen, Trash, FolderPlus } from 'lucide-react';
 import type { MouseEvent } from 'react';
 import type { TMessage } from 'librechat-data-provider';
 import {
   useDuplicateConversationMutation,
+  useCreateProjectFromConversationMutation,
   useDeleteConversationMutation,
+  useLinkProjectConversationMutation,
+  useProjectsQuery,
   useGetStartupConfig,
   useArchiveConvoMutation,
 } from '~/data-provider';
@@ -55,7 +58,14 @@ function ConvoOptions({
   const deleteButtonRef = useRef<HTMLButtonElement>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showAddToProjectDialog, setShowAddToProjectDialog] = useState(false);
+  const [showCreateProjectDialog, setShowCreateProjectDialog] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState('');
+  const [newProjectName, setNewProjectName] = useState(title ?? '');
   const [announcement, setAnnouncement] = useState('');
+  const projectsQuery = useProjectsQuery();
+  const linkProjectConversation = useLinkProjectConversationMutation(selectedProjectId);
+  const createProjectFromConversation = useCreateProjectFromConversationMutation();
 
   const archiveConvoMutation = useArchiveConvoMutation();
 
@@ -115,6 +125,15 @@ function ConvoOptions({
   const deleteHandler = useCallback(() => {
     setShowDeleteDialog(true);
   }, []);
+
+  const addToProjectHandler = useCallback(() => {
+    setShowAddToProjectDialog(true);
+  }, []);
+
+  const createProjectHandler = useCallback(() => {
+    setNewProjectName(title ?? '');
+    setShowCreateProjectDialog(true);
+  }, [title]);
 
   const handleInstantDelete = useCallback(
     (e: MouseEvent) => {
@@ -183,6 +202,45 @@ function ConvoOptions({
     });
   }, [conversationId, duplicateConversation]);
 
+  const handleAddToProject = useCallback(() => {
+    if (!selectedProjectId || !conversationId) {
+      return;
+    }
+    linkProjectConversation.mutate(
+      { conversationId, addedFrom: 'manual_add' },
+      {
+        onSuccess: () => {
+          setShowAddToProjectDialog(false);
+          setIsPopoverActive(false);
+          showToast({ message: 'Conversa adicionada ao projeto.', status: 'success' });
+        },
+      },
+    );
+  }, [conversationId, linkProjectConversation, selectedProjectId, setIsPopoverActive, showToast]);
+
+  const handleCreateProjectFromConversation = useCallback(() => {
+    const name = newProjectName.trim();
+    if (!conversationId || !name) {
+      return;
+    }
+    createProjectFromConversation.mutate(
+      { name, conversationId },
+      {
+        onSuccess: () => {
+          setShowCreateProjectDialog(false);
+          setIsPopoverActive(false);
+          showToast({ message: 'Projeto criado com esta conversa.', status: 'success' });
+        },
+      },
+    );
+  }, [
+    conversationId,
+    createProjectFromConversation,
+    newProjectName,
+    setIsPopoverActive,
+    showToast,
+  ]);
+
   const dropdownItems = useMemo(
     () => [
       {
@@ -223,6 +281,20 @@ function ConvoOptions({
         ),
       },
       {
+        label: 'Adicionar ao projeto',
+        onClick: addToProjectHandler,
+        icon: <FolderPlus className="icon-sm mr-2 text-text-primary" aria-hidden="true" />,
+        ariaHasPopup: 'dialog' as const,
+        hideOnClick: false,
+      },
+      {
+        label: 'Criar projeto com esta conversa',
+        onClick: createProjectHandler,
+        icon: <FolderPlus className="icon-sm mr-2 text-text-primary" aria-hidden="true" />,
+        ariaHasPopup: 'dialog' as const,
+        hideOnClick: false,
+      },
+      {
         label: localize('com_ui_delete'),
         onClick: deleteHandler,
         icon: <Trash className="icon-sm mr-2 text-text-primary" aria-hidden="true" />,
@@ -244,6 +316,8 @@ function ConvoOptions({
       isDuplicateLoading,
       handleArchiveClick,
       handleDuplicateClick,
+      addToProjectHandler,
+      createProjectHandler,
     ],
   );
 
@@ -341,6 +415,74 @@ function ConvoOptions({
           conversationId={conversationId ?? ''}
           setShowDeleteDialog={setShowDeleteDialog}
         />
+      )}
+      {showAddToProjectDialog && (
+        <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-md rounded-xl border border-border-light bg-surface-primary p-5 shadow-2xl">
+            <h2 className="mb-4 text-lg font-semibold text-text-primary">Adicionar ao projeto</h2>
+            <select
+              className="h-11 w-full rounded-lg border border-border-light bg-surface-secondary px-3 text-sm text-text-primary outline-none"
+              value={selectedProjectId}
+              onChange={(event) => setSelectedProjectId(event.target.value)}
+            >
+              <option value="">Escolha um projeto</option>
+              {(projectsQuery.data?.projects ?? []).map((project) => (
+                <option key={project.projectId} value={project.projectId}>
+                  {project.name}
+                </option>
+              ))}
+            </select>
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                className="rounded-full px-4 py-2 text-sm text-text-secondary hover:bg-surface-active-alt"
+                onClick={() => setShowAddToProjectDialog(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="rounded-full bg-text-primary px-5 py-2 text-sm font-medium text-surface-primary disabled:opacity-50"
+                disabled={!selectedProjectId || linkProjectConversation.isLoading}
+                onClick={handleAddToProject}
+              >
+                Adicionar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showCreateProjectDialog && (
+        <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-md rounded-xl border border-border-light bg-surface-primary p-5 shadow-2xl">
+            <h2 className="mb-4 text-lg font-semibold text-text-primary">
+              Criar projeto com esta conversa
+            </h2>
+            <input
+              className="h-11 w-full rounded-lg border border-border-light bg-surface-secondary px-3 text-sm text-text-primary outline-none"
+              value={newProjectName}
+              placeholder="Nome do projeto"
+              onChange={(event) => setNewProjectName(event.target.value)}
+            />
+            <div className="mt-5 flex justify-end gap-2">
+              <button
+                type="button"
+                className="rounded-full px-4 py-2 text-sm text-text-secondary hover:bg-surface-active-alt"
+                onClick={() => setShowCreateProjectDialog(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                className="rounded-full bg-text-primary px-5 py-2 text-sm font-medium text-surface-primary disabled:opacity-50"
+                disabled={!newProjectName.trim() || createProjectFromConversation.isLoading}
+                onClick={handleCreateProjectFromConversation}
+              >
+                Criar projeto
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );

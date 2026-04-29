@@ -1,6 +1,6 @@
 import { v4 } from 'uuid';
 import { cloneDeep } from 'lodash';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useSetRecoilState, useResetRecoilState, useRecoilValue } from 'recoil';
 import {
@@ -65,6 +65,7 @@ export default function useChatFunctions({
   setLatestMessage?: SetterOrUpdater<TMessage | null>;
 }) {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const getSender = useGetSender();
   const { user } = useAuthContext();
   const queryClient = useQueryClient();
@@ -316,6 +317,7 @@ export default function useChatFunctions({
       conversation: {
         ...conversation,
         conversationId,
+        projectId: searchParams.get('projectId') ?? conversation?.projectId,
       },
       endpointOption,
       userMessage: {

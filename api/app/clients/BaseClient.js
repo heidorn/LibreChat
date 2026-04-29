@@ -778,6 +778,7 @@ class BaseClient {
       conversationId: message.conversationId,
       endpoint: options.endpoint,
       endpointType: options.endpointType,
+      ...(options.req?.body?.projectId ? { projectId: options.req.body.projectId } : {}),
       ...endpointOptions,
     };
 
@@ -815,6 +816,14 @@ class BaseClient {
       context: 'api/app/clients/BaseClient.js - saveMessageToDatabase #saveConvo',
       unsetFields,
     });
+
+    if (options.req?.body?.projectId && message.conversationId) {
+      await db.linkProjectConversation(reqCtx.userId, {
+        projectId: options.req.body.projectId,
+        conversationId: message.conversationId,
+        addedFrom: 'created_inside_project',
+      });
+    }
 
     return { message: savedMessage, conversation };
   }

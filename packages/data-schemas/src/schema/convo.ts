@@ -30,6 +30,10 @@ const convoSchema: Schema<IConversation> = new Schema(
       default: [],
       meiliIndex: true,
     },
+    projectId: {
+      type: String,
+      index: true,
+    },
     files: {
       type: [String],
     },

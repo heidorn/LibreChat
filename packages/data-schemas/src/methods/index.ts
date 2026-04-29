@@ -32,6 +32,7 @@ import { createPresetMethods, type PresetMethods } from './preset';
 import { createConversationTagMethods, type ConversationTagMethods } from './conversationTag';
 import { createMessageMethods, type MessageMethods } from './message';
 import { createConversationMethods, type ConversationMethods } from './conversation';
+import { createProjectMethods, type ProjectMethods } from './project';
 /* Tier 3 — Complex (heavier injection) */
 import {
   createTxMethods,
@@ -79,6 +80,7 @@ export type AllMethods = UserMethods &
   ConversationTagMethods &
   MessageMethods &
   ConversationMethods &
+  ProjectMethods &
   TxMethods &
   TransactionMethods &
   SpendTokensMethods &
@@ -198,6 +200,7 @@ export function createMethods(
     ...createConversationTagMethods(mongoose),
     ...messageMethods,
     ...conversationMethods,
+    ...createProjectMethods(mongoose),
     /* Tier 3 */
     ...txMethods,
     ...transactionMethods,
@@ -236,6 +239,7 @@ export type {
   ConversationTagMethods,
   MessageMethods,
   ConversationMethods,
+  ProjectMethods,
   TxMethods,
   TransactionMethods,
   SpendTokensMethods,

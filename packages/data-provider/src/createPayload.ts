@@ -38,6 +38,7 @@ export default function createPayload(submission: t.TSubmission) {
     isRegenerate,
     editedContent,
     conversationId,
+    projectId: conversation.projectId,
     isContinued: !!(isEdited && isContinued),
     ephemeralAgent: s.isAssistantsEndpoint(endpoint) ? undefined : ephemeralAgent,
   };

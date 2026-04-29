@@ -20,7 +20,13 @@ import {
   useNewConvo,
   useLocalize,
 } from '~/hooks';
-import { useGetConvoIdQuery, useGetStartupConfig, useGetEndpointsQuery } from '~/data-provider';
+import {
+  useGetConvoIdQuery,
+  useGetStartupConfig,
+  useGetEndpointsQuery,
+  useProjectMemoriesQuery,
+  useProjectQuery,
+} from '~/data-provider';
 import { ToolCallsMapProvider } from '~/Providers';
 import ChatView from '~/components/Chat/ChatView';
 import { NotificationSeverity } from '~/common';
@@ -45,6 +51,9 @@ export default function ChatRoute() {
   const index = 0;
   const [searchParams] = useSearchParams();
   const { conversationId = '' } = useParams();
+  const projectId = searchParams.get('projectId') ?? undefined;
+  const projectQuery = useProjectQuery(projectId);
+  const projectMemoriesQuery = useProjectMemoriesQuery(projectId);
   useIdChangeEffect(conversationId);
   const { hasSetConversation, conversation } = store.useCreateConversationAtom(index);
   const { newConversation } = useNewConvo();
@@ -103,13 +112,36 @@ export default function ChatRoute() {
       });
       const querySettings = processValidSettings(queryParams);
 
-      if (Object.keys(querySettings).length > 0) {
-        return mergeQuerySettingsWithSpec(specPreset, querySettings);
+      const project = projectQuery.data;
+      const projectMemories = projectMemoriesQuery.data?.memories ?? [];
+      const projectMemoryText = projectMemories.map((memory) => `- ${memory.content}`).join('\n');
+      const projectPrompt = project
+        ? [
+            `[PROJECT: ${project.name}]`,
+            project.instructions ? `[PROJECT INSTRUCTIONS]\n${project.instructions}` : '',
+            projectMemoryText ? `[PROJECT MEMORY]\n${projectMemoryText}` : '',
+          ]
+            .filter(Boolean)
+            .join('\n\n')
+        : '';
+      const projectSettings = projectPrompt
+        ? {
+            promptPrefix: [specPreset?.promptPrefix, projectPrompt].filter(Boolean).join('\n\n'),
+            projectId,
+          }
+        : projectId
+          ? { projectId }
+          : {};
+
+      if (Object.keys(querySettings).length > 0 || Object.keys(projectSettings).length > 0) {
+        return mergeQuerySettingsWithSpec(specPreset, { ...querySettings, ...projectSettings });
       }
       return specPreset;
     };
 
-    if (isNewConvo && endpointsQuery.data && modelsQuery.data) {
+    const projectReady = !projectId || (projectQuery.data && projectMemoriesQuery.data);
+
+    if (isNewConvo && endpointsQuery.data && modelsQuery.data && projectReady) {
       const preset = getNewConvoPreset();
 
       logger.log('conversation', 'ChatRoute, new convo effect', conversation);
@@ -155,6 +187,7 @@ export default function ChatRoute() {
       hasSetConversation.current = true;
     } else if (
       isNewConvo &&
+      projectReady &&
       assistantListMap[EModelEndpoint.assistants] &&
       assistantListMap[EModelEndpoint.azureAssistants]
     ) {
@@ -185,6 +218,9 @@ export default function ChatRoute() {
   }, [
     roles,
     startupConfig,
+    projectId,
+    projectQuery.data,
+    projectMemoriesQuery.data,
     initialConvoQuery.data,
     initialConvoQuery.isError,
     endpointsQuery.data,

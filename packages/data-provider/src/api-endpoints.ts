@@ -387,6 +387,22 @@ export const conversationTagsList = (pageNumber: string, sort?: string, order?: 
 export const addTagToConversation = (conversationId: string) =>
   `${conversationTags()}/convo/${conversationId}`;
 
+/* Projects */
+export const projects = () => `${BASE_URL}/api/projects`;
+export const projectById = (projectId: string) =>
+  `${projects()}/${encodeURIComponent(projectId)}`;
+export const projectConversations = (projectId: string) =>
+  `${projectById(projectId)}/conversations`;
+export const linkProjectConversation = (projectId: string) =>
+  `${projectConversations(projectId)}/link`;
+export const projectConversation = (projectId: string, conversationId: string) =>
+  `${projectConversations(projectId)}/${encodeURIComponent(conversationId)}`;
+export const projectFromConversation = () => `${projects()}/from-conversation`;
+export const projectFiles = (projectId: string) => `${projectById(projectId)}/files`;
+export const projectMemories = (projectId: string) => `${projectById(projectId)}/memories`;
+export const projectMemory = (projectId: string, memoryId: string) =>
+  `${projectMemories(projectId)}/${encodeURIComponent(memoryId)}`;
+
 export const userTerms = () => `${BASE_URL}/api/user/terms`;
 export const acceptUserTerms = () => `${BASE_URL}/api/user/terms/accept`;
 export const banner = () => `${BASE_URL}/api/banner`;

@@ -12,6 +12,7 @@ import request from './request';
 import * as s from './schemas';
 import * as r from './roles';
 import * as permissions from './accessPermissions';
+import type * as projects from './types/projects';
 
 export function revokeUserKey(name: string): Promise<unknown> {
   return request.delete(endpoints.revokeUserKey(name));
@@ -942,6 +943,75 @@ export function addTagToConversation(
   payload: t.TTagConversationRequest,
 ): Promise<t.TTagConversationResponse> {
   return request.put(endpoints.addTagToConversation(conversationId), payload);
+}
+
+export function listProjects(): Promise<projects.ProjectListResponse> {
+  return request.get(endpoints.projects());
+}
+
+export function createProject(
+  payload: projects.CreateProjectRequest,
+): Promise<projects.TProject> {
+  return request.post(endpoints.projects(), payload);
+}
+
+export function getProject(projectId: string): Promise<projects.TProject> {
+  return request.get(endpoints.projectById(projectId));
+}
+
+export function updateProject(
+  projectId: string,
+  payload: projects.UpdateProjectRequest,
+): Promise<projects.TProject> {
+  return request.patch(endpoints.projectById(projectId), payload);
+}
+
+export function deleteProject(projectId: string): Promise<projects.TProject> {
+  return request.delete(endpoints.projectById(projectId));
+}
+
+export function listProjectConversations(
+  projectId: string,
+): Promise<projects.ProjectConversationsResponse> {
+  return request.get(endpoints.projectConversations(projectId));
+}
+
+export function linkProjectConversation(
+  projectId: string,
+  payload: projects.LinkProjectConversationRequest,
+): Promise<projects.TProjectConversation> {
+  return request.post(endpoints.linkProjectConversation(projectId), payload);
+}
+
+export function unlinkProjectConversation(
+  projectId: string,
+  conversationId: string,
+): Promise<projects.TProjectConversation | { ok: boolean }> {
+  return request.delete(endpoints.projectConversation(projectId, conversationId));
+}
+
+export function createProjectFromConversation(
+  payload: projects.CreateProjectFromConversationRequest,
+): Promise<projects.TProject> {
+  return request.post(endpoints.projectFromConversation(), payload);
+}
+
+export function listProjectMemories(projectId: string): Promise<projects.ProjectMemoriesResponse> {
+  return request.get(endpoints.projectMemories(projectId));
+}
+
+export function createProjectMemory(
+  projectId: string,
+  payload: projects.CreateProjectMemoryRequest,
+): Promise<projects.TProjectMemory> {
+  return request.post(endpoints.projectMemories(projectId), payload);
+}
+
+export function deleteProjectMemory(
+  projectId: string,
+  memoryId: string,
+): Promise<projects.TProjectMemory | { ok: boolean }> {
+  return request.delete(endpoints.projectMemory(projectId, memoryId));
 }
 export function rebuildConversationTags(): Promise<t.TConversationTagsResponse> {
   return request.post(endpoints.conversationTags('rebuild'));

@@ -19,6 +19,7 @@ import { createTransactionModel } from './transaction';
 import { createPresetModel } from './preset';
 import { createPromptModel } from './prompt';
 import { createPromptGroupModel } from './promptGroup';
+import { createProjectModels } from './project';
 import { createConversationTagModel } from './conversationTag';
 import { createSharedLinkModel } from './sharedLink';
 import { createToolCallModel } from './toolCall';
@@ -33,6 +34,8 @@ import { createConfigModel } from './config';
  * Creates all database models for all collections
  */
 export function createModels(mongoose: typeof import('mongoose')) {
+  const projectModels = createProjectModels(mongoose);
+
   return {
     User: createUserModel(mongoose),
     Token: createTokenModel(mongoose),
@@ -55,6 +58,7 @@ export function createModels(mongoose: typeof import('mongoose')) {
     Preset: createPresetModel(mongoose),
     Prompt: createPromptModel(mongoose),
     PromptGroup: createPromptGroupModel(mongoose),
+    ...projectModels,
     ConversationTag: createConversationTagModel(mongoose),
     SharedLink: createSharedLinkModel(mongoose),
     ToolCall: createToolCallModel(mongoose),
