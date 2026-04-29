@@ -27,6 +27,13 @@ const getOwnerEmail = () => {
     .toLowerCase();
 };
 
+const getFallbackOwner = async () => {
+  const User = mongoose.models.User;
+  return await User.findOne({ role: 'ADMIN' })
+    .lean()
+    .then((user) => user || User.findOne().lean());
+};
+
 const buildAgentData = (user) => ({
   name: AGENT_NAME,
   description: 'Agente de uso geral para criar e editar imagens com a ferramenta Gemini Image.',
@@ -81,26 +88,46 @@ const grantOwnerPermissions = async ({ userId, agentId }) => {
   ]);
 };
 
+const grantPublicPermissions = async ({ userId, agentId }) => {
+  await Promise.all([
+    grantPermission({
+      principalType: PrincipalType.PUBLIC,
+      principalId: null,
+      resourceType: ResourceType.AGENT,
+      resourceId: agentId,
+      accessRoleId: AccessRoleIds.AGENT_VIEWER,
+      grantedBy: userId,
+    }),
+    grantPermission({
+      principalType: PrincipalType.PUBLIC,
+      principalId: null,
+      resourceType: ResourceType.REMOTE_AGENT,
+      resourceId: agentId,
+      accessRoleId: AccessRoleIds.REMOTE_AGENT_VIEWER,
+      grantedBy: userId,
+    }),
+  ]);
+};
+
 const seedImageAgent = async () => {
   const ownerEmail = getOwnerEmail();
-  if (!ownerEmail) {
-    console.red('Informe o email do usuario dono do agente.');
-    console.white('Exemplo: npm run seed:lph-image-agent -- --email=voce@email.com');
-    return silentExit(1);
-  }
 
   await connect();
   Object.assign(mongoose.models, createModels(mongoose));
   await db.seedDatabase();
 
-  const user = await db.findUser({ email: ownerEmail });
+  const user = ownerEmail ? await db.findUser({ email: ownerEmail }) : await getFallbackOwner();
   if (!user) {
-    console.red(`Usuario nao encontrado: ${ownerEmail}`);
+    console.red(
+      ownerEmail
+        ? `Usuario nao encontrado: ${ownerEmail}`
+        : 'Nenhum usuario encontrado para ser dono tecnico do agente.',
+    );
     return silentExit(1);
   }
 
   const agentData = buildAgentData(user);
-  let agent = await db.getAgent({ author: user._id, name: AGENT_NAME });
+  let agent = await db.getAgent({ name: AGENT_NAME });
 
   if (!agent) {
     agent = await db.createAgent({
@@ -124,8 +151,10 @@ const seedImageAgent = async () => {
   }
 
   await grantOwnerPermissions({ userId: user._id, agentId: agent._id });
+  await grantPublicPermissions({ userId: user._id, agentId: agent._id });
 
-  console.white(`Dono: ${user.email}`);
+  console.white(`Dono tecnico: ${user.email}`);
+  console.white('Acesso: publico para todos os usuarios');
   console.white(`Agent ID: ${agent.id}`);
   console.white(`Provider: ${DEFAULT_PROVIDER}`);
   console.white(`Model: ${DEFAULT_MODEL}`);
