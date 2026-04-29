@@ -2,8 +2,7 @@ import { useCallback, useEffect, useState, useMemo, memo, lazy, Suspense, useRef
 import { useSetRecoilState, useRecoilValue } from 'recoil';
 import { useMediaQuery } from '@librechat/client';
 import { PermissionTypes, Permissions } from 'librechat-data-provider';
-import { Folder, MoreHorizontal, Plus, Search, SquarePen, X } from 'lucide-react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Folder, MoreHorizontal, Plus, Search, SquarePen } from 'lucide-react';
 import type { InfiniteQueryObserverResult } from '@tanstack/react-query';
 import type { ConversationListResponse } from 'librechat-data-provider';
 import type { List } from 'react-virtualized';
@@ -18,23 +17,23 @@ import {
 import { useConversationsInfiniteQuery, useTitleGeneration } from '~/data-provider';
 import { Conversations } from '~/components/Conversations';
 import SearchBar from '~/components/Nav/SearchBar';
-import {
-  createProjectId,
-  getAllProjects,
-  getProjectTag,
-  saveStoredProjects,
-  setPendingProjectChat,
-  type LphProject,
-} from '~/utils/projects';
 import store from '~/store';
 
 const BookmarkNav = lazy(() => import('~/components/Nav/Bookmarks/BookmarkNav'));
 const AccountSettings = lazy(() => import('~/components/Nav/AccountSettings'));
 
+const pinnedProjects = [
+  'Novo Projeto',
+  'Projeto 01',
+  'Projeto 02',
+  'Projeto 03',
+  'Projeto 04',
+  'Projeto 05',
+  'Projeto 06',
+];
+
 const ConversationsSection = memo(() => {
   const localize = useLocalize();
-  const navigate = useNavigate();
-  const location = useLocation();
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
   const setSidebarExpanded = useSetRecoilState(store.sidebarExpanded);
   const { isAuthenticated } = useAuthContext();
@@ -44,9 +43,6 @@ const ConversationsSection = memo(() => {
   const [isChatsExpanded, setIsChatsExpanded] = useLocalStorage('chatsExpanded', true);
   const [showLoading, setShowLoading] = useState(false);
   const [tags, setTags] = useState<string[]>([]);
-  const [projectName, setProjectName] = useState('');
-  const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
-  const [projects, setProjects] = useState<LphProject[]>(() => getAllProjects());
 
   const hasAccessToBookmarks = useHasAccess({
     permissionType: PermissionTypes.BOOKMARKS,
@@ -93,48 +89,6 @@ const ConversationsSection = memo(() => {
     return data ? data.pages.flatMap((page) => page.conversations) : [];
   }, [data]);
 
-  const activeProjectId = useMemo(() => {
-    const match = location.pathname.match(/^\/projects\/([^/]+)/);
-    return match?.[1] ?? null;
-  }, [location.pathname]);
-
-  const visibleProjects = useMemo(() => projects.slice(0, 6), [projects]);
-  const hiddenProjects = useMemo(() => projects.slice(6), [projects]);
-
-  useEffect(() => {
-    if (activeProjectId) {
-      setTags([getProjectTag(activeProjectId)]);
-      return;
-    }
-    setTags([]);
-  }, [activeProjectId]);
-
-  useEffect(() => {
-    setProjects(getAllProjects());
-  }, [isProjectModalOpen, location.pathname]);
-
-  const createProject = useCallback(() => {
-    const nextName = projectName.trim();
-    if (!nextName) {
-      return;
-    }
-
-    const newProject = {
-      id: createProjectId(nextName),
-      name: nextName,
-      createdAt: new Date().toISOString(),
-    };
-    const nextProjects = [
-      newProject,
-      ...projects.filter((project) => project.name.toLowerCase() !== nextName.toLowerCase()),
-    ];
-    saveStoredProjects(nextProjects);
-    setProjects(getAllProjects());
-    setProjectName('');
-    setIsProjectModalOpen(false);
-    navigate(`/projects/${newProject.id}`);
-  }, [navigate, projectName, projects]);
-
   const toggleNav = useCallback(() => {
     if (isSmallScreen) {
       setSidebarExpanded(false);
@@ -147,32 +101,6 @@ const ConversationsSection = memo(() => {
     }
     fetchNextPage();
   }, [isFetchingNextPage, computedHasNextPage, fetchNextPage]);
-
-  const openProject = useCallback(
-    (project: LphProject) => {
-      setTags([getProjectTag(project.id)]);
-      toggleNav();
-      navigate(`/projects/${project.id}`);
-    },
-    [navigate, toggleNav],
-  );
-
-  const startNewChat = useCallback(() => {
-    if (!activeProjectId) {
-      newConversation();
-      return;
-    }
-
-    const project = projects.find((item) => item.id === activeProjectId);
-    if (project) {
-      setPendingProjectChat(project);
-    }
-    const params = new URLSearchParams({
-      projectTag: getProjectTag(activeProjectId),
-      projectName: project?.name ?? 'Projeto',
-    });
-    navigate(`/c/new?${params.toString()}`);
-  }, [activeProjectId, navigate, newConversation, projects]);
 
   const [isSearchLoading, setIsSearchLoading] = useState(
     !!search.query && (search.isTyping || isLoading || isFetching),
@@ -206,10 +134,10 @@ const ConversationsSection = memo(() => {
       <button
         type="button"
         className="mb-2 flex h-10 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium text-text-primary hover:bg-surface-active-alt"
-        onClick={startNewChat}
+        onClick={() => newConversation()}
       >
         <SquarePen className="h-5 w-5" aria-hidden="true" />
-        {activeProjectId ? 'Novo chat neste projeto' : 'Novo chat'}
+        Novo chat
       </button>
 
       <div className="mb-5 flex items-center gap-2 rounded-lg px-2 text-sm text-text-primary hover:bg-surface-active-alt">
@@ -228,42 +156,27 @@ const ConversationsSection = memo(() => {
           Projetos
         </div>
         <div className="space-y-1">
+          {pinnedProjects.map((project, index) => {
+            const isNewProject = index === 0;
+            const Icon = isNewProject ? Plus : Folder;
+            return (
+              <button
+                key={project}
+                type="button"
+                className="flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm text-text-primary hover:bg-surface-active-alt"
+              >
+                <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                <span className="truncate">{project}</span>
+              </button>
+            );
+          })}
           <button
             type="button"
             className="flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm text-text-primary hover:bg-surface-active-alt"
-            onClick={() => setIsProjectModalOpen(true)}
-          >
-            <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
-            <span className="truncate">Novo Projeto</span>
-          </button>
-          {visibleProjects.map((project) => (
-            <button
-              key={project.id}
-              type="button"
-              className={`flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm text-text-primary hover:bg-surface-active-alt ${
-                activeProjectId === project.id ? 'bg-surface-active-alt' : ''
-              }`}
-              onClick={() => openProject(project)}
-            >
-              <Folder className="h-4 w-4 shrink-0" aria-hidden="true" />
-              <span className="truncate">{project.name}</span>
-            </button>
-          ))}
-          <button
-            type="button"
-            className="flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm text-text-primary hover:bg-surface-active-alt"
-            onClick={() => setProjects(getAllProjects())}
           >
             <MoreHorizontal className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>Mais</span>
           </button>
-          {hiddenProjects.length > 0 && (
-            <div className="hidden">
-              {hiddenProjects.map((project) => (
-                <span key={project.id}>{project.name}</span>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
@@ -296,54 +209,6 @@ const ConversationsSection = memo(() => {
           <AccountSettings />
         </Suspense>
       </div>
-
-      {isProjectModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-          <div className="w-full max-w-md rounded-2xl border border-border-light bg-surface-primary p-5 shadow-2xl">
-            <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-text-primary">Criar projeto</h2>
-              <button
-                type="button"
-                className="rounded-lg p-2 text-text-secondary hover:bg-surface-active-alt hover:text-text-primary"
-                aria-label="Fechar"
-                onClick={() => setIsProjectModalOpen(false)}
-              >
-                <X className="h-5 w-5" aria-hidden="true" />
-              </button>
-            </div>
-            <label className="mb-2 block text-sm font-medium text-text-primary" htmlFor="project-name">
-              Nome do projeto
-            </label>
-            <input
-              id="project-name"
-              className="mb-4 h-11 w-full rounded-xl border border-border-light bg-surface-secondary px-3 text-sm text-text-primary outline-none focus:border-text-primary"
-              value={projectName}
-              placeholder="Ex: Leads Per Hour"
-              onChange={(event) => setProjectName(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  createProject();
-                }
-              }}
-              autoFocus
-            />
-            <p className="mb-5 text-sm text-text-secondary">
-              O projeto organiza conversas em um contexto separado. Você pode entrar nele,
-              iniciar novos chats e adicionar conversas existentes pelo menu de três pontinhos.
-            </p>
-            <div className="flex justify-end">
-              <button
-                type="button"
-                className="rounded-full bg-text-primary px-5 py-2 text-sm font-medium text-surface-primary disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={!projectName.trim()}
-                onClick={createProject}
-              >
-                Criar projeto
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 });
