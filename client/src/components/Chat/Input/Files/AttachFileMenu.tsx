@@ -47,6 +47,9 @@ type FileUploadType =
   | 'image_document_extended'
   | 'image_document_video_audio';
 
+const commonDocumentExtensions =
+  '.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.md,.html,.htm,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/plain,text/markdown,text/html';
+
 interface AttachFileMenuProps {
   agentId?: string | null;
   endpoint?: string | null;
@@ -125,13 +128,13 @@ const AttachFileMenu = ({
       } else if (fileType === 'image') {
         inputRef.current.accept = 'image/*,.heif,.heic';
       } else if (fileType === 'document') {
-        inputRef.current.accept = '.pdf,application/pdf';
+        inputRef.current.accept = commonDocumentExtensions;
       } else if (fileType === 'image_document') {
-        inputRef.current.accept = 'image/*,.heif,.heic,.pdf,application/pdf';
+        inputRef.current.accept = `image/*,.heif,.heic,${commonDocumentExtensions}`;
       } else if (fileType === 'image_document_extended') {
         inputRef.current.accept = `image/*,.heif,.heic,${bedrockDocumentExtensions}`;
       } else if (fileType === 'image_document_video_audio') {
-        inputRef.current.accept = 'image/*,.heif,.heic,.pdf,application/pdf,video/*,audio/*';
+        inputRef.current.accept = `image/*,.heif,.heic,${commonDocumentExtensions},video/*,audio/*`;
       } else {
         inputRef.current.accept = '';
       }

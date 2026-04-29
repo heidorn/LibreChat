@@ -291,6 +291,12 @@ function getLLMConfig(
     });
   }
 
+  if (requestOptions.thinking != null) {
+    delete requestOptions.temperature;
+    delete requestOptions.topP;
+    delete requestOptions.topK;
+  }
+
   const tools = [];
 
   if (enableWebSearch) {

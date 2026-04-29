@@ -536,7 +536,6 @@ describe('getLLMConfig', () => {
 
         expect(result.llmConfig).toMatchObject({
           model: 'claude-3-7-sonnet',
-          temperature: 0.4,
           maxTokens: 8192,
           stream: true, // default
           thinking: {
@@ -544,6 +543,8 @@ describe('getLLMConfig', () => {
             budget_tokens: 3000,
           },
         });
+        // Anthropic rejects temperature when thinking is enabled.
+        expect(result.llmConfig).not.toHaveProperty('temperature');
         // topP and topK should NOT be included for Claude-3.7 with thinking enabled
         expect(result.llmConfig).not.toHaveProperty('topP');
         expect(result.llmConfig).not.toHaveProperty('topK');
@@ -553,6 +554,30 @@ describe('getLLMConfig', () => {
         });
         // Should pass promptCache boolean
         expect(result.llmConfig.promptCache).toBe(true);
+      });
+
+      it('should not re-add temperature from default/add params when thinking is enabled', () => {
+        const result = getLLMConfig('sk-ant-thinking-key', {
+          modelOptions: {
+            model: 'claude-sonnet-4-6',
+            thinking: true,
+            topP: 0.8,
+            topK: 10,
+          },
+          defaultParams: {
+            temperature: 0.7,
+            topP: 0.9,
+          },
+          addParams: {
+            temperature: 0.2,
+            topK: 40,
+          },
+        });
+
+        expect(result.llmConfig.thinking).toMatchObject({ type: 'adaptive' });
+        expect(result.llmConfig).not.toHaveProperty('temperature');
+        expect(result.llmConfig).not.toHaveProperty('topP');
+        expect(result.llmConfig).not.toHaveProperty('topK');
       });
 
       it('should handle web search functionality like production', () => {
@@ -738,7 +763,11 @@ describe('getLLMConfig', () => {
           const result = getLLMConfig('sk-ant-variation-key', clientOptions);
 
           expect(result.llmConfig).toHaveProperty('model', model);
-          expect(result.llmConfig).toHaveProperty('temperature', 0.5);
+          if (result.llmConfig.thinking != null) {
+            expect(result.llmConfig).not.toHaveProperty('temperature');
+          } else {
+            expect(result.llmConfig).toHaveProperty('temperature', 0.5);
+          }
           // The specific behavior (thinking, topP/topK inclusion) depends on model pattern
         });
       });
@@ -1457,10 +1486,11 @@ describe('getLLMConfig', () => {
           { model: 'claude-3.7-sonnet', thinking: false, shouldInclude: true },
           // Claude-3.7 with thinking = null - thinking defaults to true, so should exclude topP/topK
           { model: 'claude-3-7-sonnet', thinking: null, shouldInclude: false },
-          // Non-Claude-3.7 models - should always include topP/topK (thinking doesn't affect them)
+          // Non-thinking Claude models keep topP/topK.
           { model: 'claude-3-5-sonnet', thinking: true, shouldInclude: true },
           { model: 'claude-3-opus', thinking: true, shouldInclude: true },
-          { model: 'claude-sonnet-4', thinking: true, shouldInclude: true },
+          // Claude 4 thinking also rejects topP/topK.
+          { model: 'claude-sonnet-4', thinking: true, shouldInclude: false },
         ];
 
         testCases.forEach(({ model, thinking, shouldInclude }) => {

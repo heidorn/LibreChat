@@ -16,6 +16,7 @@ import {
   isBedrockDocumentType,
   defaultAgentCapabilities,
   isDocumentSupportedProvider,
+  documentParserMimeTypes,
 } from 'librechat-data-provider';
 import {
   useAgentToolPermissions,
@@ -66,6 +67,8 @@ const DragDropModal = ({ onOptionSelect, setShowModal, files, isVisible }: DragD
 
     /** Helper to get inferred MIME type for a file */
     const getFileType = (file: File) => inferMimeType(file.name, file.type);
+    const isDocumentParserFile = (type?: string | null) =>
+      type != null && documentParserMimeTypes.some((regex) => regex.test(type));
 
     const isAzureWithResponsesApi =
       currentProvider === EModelEndpoint.azureOpenAI && useResponsesApi;
@@ -88,13 +91,16 @@ const DragDropModal = ({ onOptionSelect, setShowModal, files, isVisible }: DragD
             type?.startsWith('image/') ||
             type?.startsWith('video/') ||
             type?.startsWith('audio/') ||
-            type === 'application/pdf'
+            type === 'application/pdf' ||
+            isDocumentParserFile(type)
           );
         }
         if (isBedrock) {
           return type?.startsWith('image/') || isBedrockDocumentType(type);
         }
-        return type?.startsWith('image/') || type === 'application/pdf';
+        return (
+          type?.startsWith('image/') || type === 'application/pdf' || isDocumentParserFile(type)
+        );
       };
 
       const validFileTypes = files.every(isValidProviderFile);
