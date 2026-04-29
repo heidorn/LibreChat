@@ -20,7 +20,6 @@ import ShareRoute from './ShareRoute';
 import ChatRoute from './ChatRoute';
 import Search from './Search';
 import Root from './Root';
-import ProjectRoute from './ProjectRoute';
 
 const AuthLayout = () => (
   <AuthContextProvider>
@@ -112,10 +111,6 @@ export const router = createBrowserRouter(
             {
               path: 'c/:conversationId?',
               element: <ChatRoute />,
-            },
-            {
-              path: 'projects/:projectId',
-              element: <ProjectRoute />,
             },
             {
               path: 'search',

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect } from 'react';
 import { useRecoilCallback, useRecoilValue } from 'recoil';
 import { Spinner, useToastContext } from '@librechat/client';
 import { useParams, useSearchParams } from 'react-router-dom';
@@ -20,14 +20,7 @@ import {
   useNewConvo,
   useLocalize,
 } from '~/hooks';
-import {
-  useGetConvoIdQuery,
-  useGetStartupConfig,
-  useGetEndpointsQuery,
-  useConversationTagMutation,
-  useTagConversationMutation,
-} from '~/data-provider';
-import { clearPendingProjectChat, getPendingProjectChatTag, isProjectTag } from '~/utils/projects';
+import { useGetConvoIdQuery, useGetStartupConfig, useGetEndpointsQuery } from '~/data-provider';
 import { ToolCallsMapProvider } from '~/Providers';
 import ChatView from '~/components/Chat/ChatView';
 import { NotificationSeverity } from '~/common';
@@ -51,14 +44,6 @@ export default function ChatRoute() {
 
   const index = 0;
   const [searchParams] = useSearchParams();
-  const projectTag = searchParams.get('projectTag');
-  const initialProjectTagRef = useRef(
-    isProjectTag(projectTag) ? projectTag : getPendingProjectChatTag(),
-  );
-  if (isProjectTag(projectTag)) {
-    initialProjectTagRef.current = projectTag;
-  }
-  const activeProjectTag = isProjectTag(projectTag) ? projectTag : initialProjectTagRef.current;
   const { conversationId = '' } = useParams();
   useIdChangeEffect(conversationId);
   const { hasSetConversation, conversation } = store.useCreateConversationAtom(index);
@@ -76,21 +61,6 @@ export default function ChatRoute() {
   });
   const endpointsQuery = useGetEndpointsQuery({ enabled: isAuthenticated });
   const assistantListMap = useAssistantListMap();
-  const appliedProjectTagRef = useRef(new Set<string>());
-  const ensuredProjectTagsRef = useRef(new Set<string>());
-  const tagConversationMutation = useTagConversationMutation(conversation?.conversationId ?? '');
-  const createProjectTagMutation = useConversationTagMutation({
-    context: 'project-route',
-    options: {
-      onError: (error) => {
-        logger.warn('conversation', 'Unable to create project tag before linking conversation', error);
-      },
-    },
-  });
-  const conversationTagsKey = useMemo(
-    () => JSON.stringify(conversation?.tags ?? []),
-    [conversation?.tags],
-  );
 
   const isTemporaryChat = conversation && conversation.expiredAt ? true : false;
 
@@ -103,52 +73,6 @@ export default function ChatRoute() {
       setIsTemporary(false);
     }
   }, [conversationId, isTemporaryChat, setIsTemporary, defaultTemporaryChat]);
-
-  useEffect(() => {
-    const convoId = conversation?.conversationId;
-    if (
-      !activeProjectTag ||
-      !isProjectTag(activeProjectTag) ||
-      !convoId ||
-      convoId === Constants.NEW_CONVO ||
-      !isAuthenticated
-    ) {
-      return;
-    }
-
-    const currentTags = conversation?.tags ?? [];
-    if (currentTags.includes(activeProjectTag)) {
-      return;
-    }
-
-    const projectKey = `${convoId}:${activeProjectTag}`;
-    if (appliedProjectTagRef.current.has(projectKey)) {
-      return;
-    }
-
-    appliedProjectTagRef.current.add(projectKey);
-    clearPendingProjectChat();
-
-    if (!ensuredProjectTagsRef.current.has(activeProjectTag)) {
-      ensuredProjectTagsRef.current.add(activeProjectTag);
-      createProjectTagMutation.mutate({
-        tag: activeProjectTag,
-        description: 'Projeto',
-      });
-    }
-
-    tagConversationMutation.mutate({
-      tag: activeProjectTag,
-      tags: Array.from(new Set([...currentTags, activeProjectTag])),
-    });
-  }, [
-    activeProjectTag,
-    conversation?.conversationId,
-    conversationTagsKey,
-    createProjectTagMutation,
-    isAuthenticated,
-    tagConversationMutation,
-  ]);
 
   /** This effect is mainly for the first conversation state change on first load of the page.
    *  Adjusting this may have unintended consequences on the conversation state.

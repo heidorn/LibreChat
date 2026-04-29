@@ -39,7 +39,6 @@ import { useResetChatBadges } from './useChatBadges';
 import { useApplyModelSpecEffects } from './Agents';
 import { usePauseGlobalAudio } from './Audio';
 import { useHasAccess } from '~/hooks';
-import { getPendingProjectChatTag, isProjectTag } from '~/utils/projects';
 import store from '~/store';
 
 const useNewConvo = (index = 0) => {
@@ -290,15 +289,11 @@ const useNewConvo = (index = 0) => {
           ? { endpoint: _template.endpoint }
           : _template;
 
-      const pendingProjectTag = getPendingProjectChatTag();
       const conversation = {
         conversationId: Constants.NEW_CONVO as string,
         title: 'New Chat',
         endpoint: null,
         ...template,
-        tags: isProjectTag(pendingProjectTag)
-          ? Array.from(new Set([...(template.tags ?? []), pendingProjectTag]))
-          : template.tags,
         createdAt: '',
         updatedAt: '',
       };

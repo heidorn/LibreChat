@@ -780,9 +780,6 @@ class BaseClient {
       endpointType: options.endpointType,
       ...endpointOptions,
     };
-    if (Array.isArray(options.req?.body?.tags) && options.req.body.tags.length > 0) {
-      fieldsToKeep.tags = options.req.body.tags;
-    }
 
     const existingConvo =
       this.fetchedConvo === true
