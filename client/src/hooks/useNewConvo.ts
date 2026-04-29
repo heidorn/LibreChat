@@ -233,8 +233,14 @@ const useNewConvo = (index = 0) => {
           return;
         }
 
-        const searchParamsString = searchParams?.toString();
-        const getParams = () => (searchParamsString ? `?${searchParamsString}` : '');
+        const getParams = () => {
+          const params = new URLSearchParams(searchParams);
+          if (conversation.projectId && !params.get('projectId')) {
+            params.set('projectId', conversation.projectId);
+          }
+          const searchParamsString = params.toString();
+          return searchParamsString ? `?${searchParamsString}` : '';
+        };
 
         if (conversation.conversationId === Constants.NEW_CONVO && !modelsData) {
           const appTitle = localStorage.getItem(LocalStorageKeys.APP_TITLE) ?? '';

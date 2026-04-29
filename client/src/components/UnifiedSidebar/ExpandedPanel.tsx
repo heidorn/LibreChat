@@ -1,6 +1,7 @@
-import { memo, useCallback, lazy, Suspense } from 'react';
+import { memo, useCallback, lazy, Suspense, useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRecoilValue } from 'recoil';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import { SquarePen } from 'lucide-react';
 import { QueryKeys } from 'librechat-data-provider';
 import { Skeleton, Sidebar, Button, TooltipAnchor } from '@librechat/client';
@@ -21,8 +22,18 @@ const NewChatButton = memo(function NewChatButton({
   const localize = useLocalize();
   const queryClient = useQueryClient();
   const { newConversation } = useNewConvo();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const conversation = useRecoilValue(store.conversationByIndex(0));
   const switchToHistory = useRecoilValue(store.newChatSwitchToHistory);
+  const activeProjectId = useMemo(() => {
+    const fromSearch = searchParams.get('projectId');
+    if (fromSearch) {
+      return fromSearch;
+    }
+    const match = location.pathname.match(/^\/projects\/([^/]+)/);
+    return match?.[1] ? decodeURIComponent(match[1]) : undefined;
+  }, [location.pathname, searchParams]);
 
   const handleClick = useCallback(
     (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -30,13 +41,22 @@ const NewChatButton = memo(function NewChatButton({
         e.preventDefault();
         clearMessagesCache(queryClient, conversation?.conversationId);
         queryClient.invalidateQueries([QueryKeys.messages]);
-        newConversation();
+        newConversation({
+          template: activeProjectId ? { projectId: activeProjectId } : undefined,
+        });
         if (switchToHistory) {
           setActive(DEFAULT_PANEL);
         }
       }
     },
-    [queryClient, conversation?.conversationId, newConversation, switchToHistory, setActive],
+    [
+      queryClient,
+      conversation?.conversationId,
+      newConversation,
+      activeProjectId,
+      switchToHistory,
+      setActive,
+    ],
   );
 
   return (

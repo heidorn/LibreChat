@@ -3,7 +3,7 @@ import { useSetRecoilState, useRecoilValue } from 'recoil';
 import { useMediaQuery } from '@librechat/client';
 import { PermissionTypes, Permissions } from 'librechat-data-provider';
 import { Folder, MoreHorizontal, Plus, Search, SquarePen, X } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import type { InfiniteQueryObserverResult } from '@tanstack/react-query';
 import type { ConversationListResponse } from 'librechat-data-provider';
 import type { List } from 'react-virtualized';
@@ -30,6 +30,8 @@ const AccountSettings = lazy(() => import('~/components/Nav/AccountSettings'));
 const ConversationsSection = memo(() => {
   const localize = useLocalize();
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
   const setSidebarExpanded = useSetRecoilState(store.sidebarExpanded);
   const { isAuthenticated } = useAuthContext();
@@ -90,6 +92,14 @@ const ConversationsSection = memo(() => {
 
   const projects = useMemo(() => projectsQuery.data?.projects ?? [], [projectsQuery.data?.projects]);
   const visibleProjects = useMemo(() => projects.slice(0, 6), [projects]);
+  const activeProjectId = useMemo(() => {
+    const fromSearch = searchParams.get('projectId');
+    if (fromSearch) {
+      return fromSearch;
+    }
+    const match = location.pathname.match(/^\/projects\/([^/]+)/);
+    return match?.[1] ? decodeURIComponent(match[1]) : undefined;
+  }, [location.pathname, searchParams]);
 
   const toggleNav = useCallback(() => {
     if (isSmallScreen) {
@@ -161,7 +171,11 @@ const ConversationsSection = memo(() => {
       <button
         type="button"
         className="mb-2 flex h-10 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium text-text-primary hover:bg-surface-active-alt"
-        onClick={() => newConversation()}
+        onClick={() =>
+          newConversation({
+            template: activeProjectId ? { projectId: activeProjectId } : undefined,
+          })
+        }
       >
         <SquarePen className="h-5 w-5" aria-hidden="true" />
         Novo chat
