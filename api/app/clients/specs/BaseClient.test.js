@@ -921,6 +921,60 @@ describe('BaseClient', () => {
       });
     });
 
+    test('should not persist generated project context in conversation promptPrefix', async () => {
+      jest.clearAllMocks();
+      const user = { id: 'user-id' };
+
+      getConvo.mockResolvedValue(null);
+      saveConvo.mockResolvedValue({ conversationId: 'existing-project-context-convo-id' });
+      linkProjectConversation.mockResolvedValue({});
+
+      TestClient = initializeFakeClient(
+        apiKey,
+        {
+          ...options,
+          req: {
+            user,
+            body: {
+              projectId: 'project-id',
+            },
+          },
+          promptPrefix: [
+            'Base user prompt',
+            '[PROJECT CONTEXT START]',
+            '[PROJECT: LPH]',
+            '[PROJECT INSTRUCTIONS]\nUse a palavra secreta.',
+            '[PROJECT CONTEXT END]',
+          ].join('\n\n'),
+        },
+        [],
+      );
+
+      await TestClient.saveMessageToDatabase(
+        {
+          conversationId: 'existing-project-context-convo-id',
+          messageId: 'message-id',
+          parentMessageId: 'parent-message-id',
+          sender: 'User',
+          text: 'Message inside a project',
+          isCreatedByUser: true,
+        },
+        {
+          promptPrefix: [
+            'Base user prompt',
+            '[PROJECT CONTEXT START]',
+            '[PROJECT: LPH]',
+            '[PROJECT INSTRUCTIONS]\nUse a palavra secreta.',
+            '[PROJECT CONTEXT END]',
+          ].join('\n\n'),
+        },
+        user,
+      );
+
+      const [, savedFields] = saveConvo.mock.calls[0];
+      expect(savedFields).toHaveProperty('promptPrefix', 'Base user prompt');
+    });
+
     test('sendCompletion is called with the correct arguments', async () => {
       const payload = {}; // Mock payload
       TestClient.buildMessages.mockReturnValue({ prompt: payload, tokenCountMap: null });

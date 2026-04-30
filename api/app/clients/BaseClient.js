@@ -789,6 +789,22 @@ class BaseClient {
       ...endpointOptions,
     };
 
+    if (
+      options.req?.body?.projectId &&
+      typeof fieldsToKeep.promptPrefix === 'string' &&
+      fieldsToKeep.promptPrefix.includes('[PROJECT CONTEXT START]')
+    ) {
+      const cleanedPromptPrefix = fieldsToKeep.promptPrefix
+        .replace(/\n*\[PROJECT CONTEXT START\][\s\S]*?\[PROJECT CONTEXT END\]\n*/g, '\n\n')
+        .trim();
+
+      if (cleanedPromptPrefix) {
+        fieldsToKeep.promptPrefix = cleanedPromptPrefix;
+      } else {
+        delete fieldsToKeep.promptPrefix;
+      }
+    }
+
     const existingConvo =
       this.fetchedConvo === true
         ? null

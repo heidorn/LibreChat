@@ -33,7 +33,9 @@ export default function ProjectRoute() {
   }
 
   const startProjectChat = () => {
-    navigate(`/c/new?projectId=${encodeURIComponent(project.projectId)}`);
+    navigate(
+      `/c/new?projectId=${encodeURIComponent(project.projectId)}&projectChat=${Date.now()}`,
+    );
   };
 
   const saveInstructions = () => {

@@ -34,6 +34,20 @@ import useAuthRedirect from './useAuthRedirect';
 import temporaryStore from '~/store/temporary';
 import store from '~/store';
 
+const PROJECT_CONTEXT_START = '[PROJECT CONTEXT START]';
+const PROJECT_CONTEXT_END = '[PROJECT CONTEXT END]';
+
+const stripProjectContext = (promptPrefix?: string | null) => {
+  if (!promptPrefix) {
+    return '';
+  }
+
+  return promptPrefix
+    .replace(/\n*\[PROJECT CONTEXT START\][\s\S]*?\[PROJECT CONTEXT END\]\n*/g, '\n\n')
+    .replace(/\n*\[PROJECT: [\s\S]*$/g, '')
+    .trim();
+};
+
 export default function ChatRoute() {
   const { data: startupConfig } = useGetStartupConfig();
   const { isAuthenticated, user, roles } = useAuthRedirect();
@@ -52,7 +66,8 @@ export default function ChatRoute() {
   const [searchParams] = useSearchParams();
   const { conversationId = '' } = useParams();
   const projectIdParam = searchParams.get('projectId') ?? '';
-  useIdChangeEffect(`${conversationId}:${projectIdParam}`);
+  const projectChatNonce = searchParams.get('projectChat') ?? '';
+  useIdChangeEffect(`${conversationId}:${projectIdParam}:${projectChatNonce}`);
   const { hasSetConversation, conversation } = store.useCreateConversationAtom(index);
   const { newConversation } = useNewConvo();
   const { showToast } = useToastContext();
@@ -106,16 +121,19 @@ export default function ChatRoute() {
       const projectMemoryText = projectMemories.map((memory) => `- ${memory.content}`).join('\n');
       const projectPrompt = project
         ? [
+            PROJECT_CONTEXT_START,
             `[PROJECT: ${project.name}]`,
             project.instructions ? `[PROJECT INSTRUCTIONS]\n${project.instructions}` : '',
             projectMemoryText ? `[PROJECT MEMORY]\n${projectMemoryText}` : '',
+            PROJECT_CONTEXT_END,
           ]
             .filter(Boolean)
             .join('\n\n')
         : '';
+      const cleanBasePromptPrefix = stripProjectContext(basePromptPrefix);
       return projectPrompt
         ? {
-            promptPrefix: [basePromptPrefix, projectPrompt].filter(Boolean).join('\n\n'),
+            promptPrefix: [cleanBasePromptPrefix, projectPrompt].filter(Boolean).join('\n\n'),
             projectId,
           }
         : projectId
@@ -130,7 +148,13 @@ export default function ChatRoute() {
 
       const queryParams: Record<string, string> = {};
       searchParams.forEach((value, key) => {
-        if (key !== 'prompt' && key !== 'q' && key !== 'submit') {
+        if (
+          key !== 'prompt' &&
+          key !== 'q' &&
+          key !== 'submit' &&
+          key !== 'projectId' &&
+          key !== 'projectChat'
+        ) {
           queryParams[key] = value;
         }
       });
