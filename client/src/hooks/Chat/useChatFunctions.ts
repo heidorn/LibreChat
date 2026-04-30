@@ -33,6 +33,8 @@ import store, { useGetEphemeralAgent } from '~/store';
 import { startupConfigKey } from '~/data-provider';
 import useUserKey from '~/hooks/Input/useUserKey';
 import { useAuthContext } from '~/hooks';
+import { useAgentsMapContext } from '~/Providers/AgentsMapContext';
+import { getLphManusRoute, isLphManusConversation } from '~/utils/lphManusRouter';
 
 const logChatRequest = (request: Record<string, unknown>) => {
   logger.log('=====================================\nAsk function called with:');
@@ -68,6 +70,7 @@ export default function useChatFunctions({
   const [searchParams] = useSearchParams();
   const getSender = useGetSender();
   const { user } = useAuthContext();
+  const agentsMap = useAgentsMapContext();
   const queryClient = useQueryClient();
   const setFilesToDelete = useSetFilesToDelete();
   const getEphemeralAgent = useGetEphemeralAgent();
@@ -107,12 +110,6 @@ export default function useChatFunctions({
 
     const conversation = cloneDeep(immutableConversation);
 
-    const endpoint = conversation?.endpoint;
-    if (endpoint === null) {
-      console.error('No endpoint available');
-      return;
-    }
-
     conversationId = conversationId ?? conversation?.conversationId ?? null;
     if (conversationId == 'search') {
       console.error('cannot send any message under search view!');
@@ -130,7 +127,7 @@ export default function useChatFunctions({
     let currentMessages: TMessage[] | null = overrideMessages ?? getMessages() ?? [];
     const activeProjectId = searchParams.get('projectId') ?? conversation?.projectId;
 
-    if (activeProjectId) {
+    if (activeProjectId && conversation) {
       conversation.projectId = activeProjectId;
     }
 
@@ -139,6 +136,34 @@ export default function useChatFunctions({
         text: conversation.promptPrefix,
         user,
       });
+    }
+
+    if (conversation && isLphManusConversation(conversation)) {
+      const selectedSpec = conversation.spec;
+      const route = getLphManusRoute({
+        text,
+        files: files ? Array.from(files.values()) : undefined,
+        agentsMap,
+      });
+      const routedPromptPrefix =
+        conversation.promptPrefix || route.conversation.promptPrefix || undefined;
+      Object.assign(conversation, route.conversation);
+      conversation.spec = selectedSpec;
+      conversation.promptPrefix = routedPromptPrefix;
+      logger.info('lph_manus_router', {
+        kind: route.kind,
+        reason: route.reason,
+        endpoint: conversation.endpoint,
+        model: conversation.model,
+        modelLabel: conversation.modelLabel,
+        agent_id: conversation.agent_id,
+      });
+    }
+
+    const endpoint = conversation?.endpoint;
+    if (endpoint == null) {
+      console.error('No endpoint available');
+      return;
     }
 
     // construct the query message

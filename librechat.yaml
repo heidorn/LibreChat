@@ -153,9 +153,20 @@ modelSpecs:
     - Perplexity
     - DeepSeek
   list:
+    - name: lph-manus
+      label: LPH Manus
+      default: true
+      iconURL: assets/leads-per-hour/icon.png
+      preset:
+        endpoint: openAI
+        model: gpt-4o-mini
+        modelLabel: LPH Manus
+        greeting: 'Bom dia, Ricardo. Como posso ajudar você hoje?'
+        promptPrefix: |
+          Você é a Leads Per Hour, um assistente de IA geral, claro e prático. Ajude o usuário com escrita, pesquisa, análise, imagens, arquivos, ideias, planejamento e execução. Não force nenhum contexto específico a menos que o usuário peça.
+
     - name: lph-gpt-fast
       label: GPT rapido
-      default: true
       iconURL: openAI
       preset:
         endpoint: openAI
