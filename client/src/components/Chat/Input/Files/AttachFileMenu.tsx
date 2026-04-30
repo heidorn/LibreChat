@@ -47,8 +47,8 @@ type FileUploadType =
   | 'image_document_extended'
   | 'image_document_video_audio';
 
-const commonDocumentExtensions =
-  '.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.md,.html,.htm,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/plain,text/markdown,text/html';
+const userWorkspaceDocumentExtensions =
+  '.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/plain';
 
 interface AttachFileMenuProps {
   agentId?: string | null;
@@ -128,13 +128,13 @@ const AttachFileMenu = ({
       } else if (fileType === 'image') {
         inputRef.current.accept = 'image/*,.heif,.heic';
       } else if (fileType === 'document') {
-        inputRef.current.accept = commonDocumentExtensions;
+        inputRef.current.accept = userWorkspaceDocumentExtensions;
       } else if (fileType === 'image_document') {
-        inputRef.current.accept = `image/*,.heif,.heic,${commonDocumentExtensions}`;
+        inputRef.current.accept = `image/*,.heif,.heic,${userWorkspaceDocumentExtensions}`;
       } else if (fileType === 'image_document_extended') {
         inputRef.current.accept = `image/*,.heif,.heic,${bedrockDocumentExtensions}`;
       } else if (fileType === 'image_document_video_audio') {
-        inputRef.current.accept = `image/*,.heif,.heic,${commonDocumentExtensions},video/*,audio/*`;
+        inputRef.current.accept = `image/*,.heif,.heic,${userWorkspaceDocumentExtensions},video/*,audio/*`;
       } else {
         inputRef.current.accept = '';
       }
@@ -196,7 +196,7 @@ const AttachFileMenu = ({
           label: localize('com_ui_upload_ocr_text'),
           onClick: () => {
             setToolResource(EToolResources.context);
-            onAction();
+            onAction('document');
           },
           icon: <FileType2Icon className="icon-md" />,
         });

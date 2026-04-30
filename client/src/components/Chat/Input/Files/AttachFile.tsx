@@ -5,6 +5,9 @@ import type { ExtendedFile, FileSetter } from '~/common';
 import { useFileHandlingNoChatContext, useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
+const userWorkspaceFileExtensions =
+  'image/*,.heif,.heic,.pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,text/csv,text/plain';
+
 const AttachFile = ({
   disabled,
   files,
@@ -49,7 +52,9 @@ const AttachFile = ({
               }
               if (e.key === 'Enter' || e.key === ' ') {
                 inputRef.current.value = '';
+                inputRef.current.accept = userWorkspaceFileExtensions;
                 inputRef.current.click();
+                inputRef.current.accept = '';
               }
             }}
             onClick={() => {
@@ -57,7 +62,9 @@ const AttachFile = ({
                 return;
               }
               inputRef.current.value = '';
+              inputRef.current.accept = userWorkspaceFileExtensions;
               inputRef.current.click();
+              inputRef.current.accept = '';
             }}
           >
             <div className="flex w-full items-center justify-center gap-2">
