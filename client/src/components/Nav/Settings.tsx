@@ -152,19 +152,19 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
           <div className={cn('fixed inset-0 flex w-screen items-center justify-center p-4')}>
             <DialogPanel
               className={cn(
-                'max-h-[90vh] overflow-hidden rounded-xl rounded-b-lg bg-background pb-6 shadow-2xl backdrop-blur-2xl animate-in sm:rounded-2xl md:w-[680px]',
+                'lph-settings-dialog max-h-[90vh] overflow-hidden rounded-xl rounded-b-lg pb-6 shadow-2xl backdrop-blur-2xl animate-in sm:rounded-2xl md:w-[680px]',
               )}
             >
               <DialogTitle
                 className="mb-1 flex items-center justify-between p-6 pb-5 text-left"
                 as="div"
               >
-                <h2 className="text-lg font-medium leading-6 text-text-primary">
+                <h2 className="lph-brand-font text-2xl font-semibold leading-6 text-[var(--lph-text)]">
                   {localize('com_nav_settings')}
                 </h2>
                 <button
                   type="button"
-                  className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-border-xheavy focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-surface-primary dark:focus:ring-offset-surface-primary"
+                  className="rounded-md p-1 text-[var(--lph-text-muted)] opacity-80 transition-opacity hover:bg-[var(--lph-bg-panel-hover)] hover:text-[var(--lph-text)] hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-[var(--lph-orange-soft)] disabled:pointer-events-none"
                   onClick={() => onOpenChange(false)}
                 >
                   <svg
@@ -177,7 +177,7 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
                     strokeWidth="2"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-5 w-5 text-text-primary"
+                    className="h-5 w-5"
                   >
                     <line x1="18" x2="6" y1="6" y2="18"></line>
                     <line x1="6" x2="18" y1="6" y2="18"></line>
@@ -197,7 +197,7 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
                     className={cn(
                       'min-w-auto max-w-auto relative -ml-[8px] flex flex-shrink-0 flex-col flex-nowrap overflow-auto sm:max-w-none',
                       isSmallScreen
-                        ? 'flex-row rounded-xl bg-surface-secondary'
+                        ? 'flex-row rounded-xl bg-[var(--lph-bg-panel)]'
                         : 'sticky top-0 h-full',
                     )}
                     onKeyDown={handleKeyDown}
@@ -206,10 +206,10 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
                       <Tabs.Trigger
                         key={value}
                         className={cn(
-                          'group relative z-10 m-1 flex items-center justify-start gap-2 rounded-xl px-2 py-1.5 transition-all duration-200 ease-in-out',
+                          'group relative z-10 m-1 flex items-center justify-start gap-2 rounded-md px-2 py-1.5 transition-all duration-200 ease-in-out',
                           isSmallScreen
-                            ? 'flex-1 justify-center text-nowrap p-1 px-3 text-sm text-text-secondary radix-state-active:bg-surface-hover radix-state-active:text-text-primary'
-                            : 'bg-transparent text-text-secondary radix-state-active:bg-surface-tertiary radix-state-active:text-text-primary',
+                            ? 'flex-1 justify-center text-nowrap p-1 px-3 text-sm text-[var(--lph-text-muted)] radix-state-active:bg-[var(--lph-bg-panel-active)] radix-state-active:text-[var(--lph-text)]'
+                            : 'bg-transparent text-[var(--lph-text-muted)] hover:bg-[var(--lph-bg-panel-hover)] hover:text-[var(--lph-text)] radix-state-active:bg-[var(--lph-bg-panel-active)] radix-state-active:text-[var(--lph-text)]',
                         )}
                         value={value}
                         ref={(el) => (tabRefs.current[value] = el)}

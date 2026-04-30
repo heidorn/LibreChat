@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Folder, MessageSquarePlus, Save } from 'lucide-react';
+import { FileText, Folder, MessageSquare, MessageSquarePlus, Save, Sparkles } from 'lucide-react';
 import {
   useCreateProjectMemoryMutation,
   useProjectConversationsQuery,
@@ -54,12 +54,17 @@ export default function ProjectRoute() {
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-[var(--lph-bg-app)] px-6 py-8 text-[var(--lph-text)]">
+    <div className="h-full overflow-y-auto bg-[var(--lph-bg-app)] px-6 py-10 text-[var(--lph-text)]">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
         <header className="flex flex-col gap-5">
           <div className="flex items-center gap-3">
-            <Folder className="h-8 w-8 text-[var(--lph-text-muted)]" aria-hidden="true" />
-            <h1 className="lph-brand-font text-4xl font-semibold">{project.name}</h1>
+            <span className="grid h-10 w-10 place-items-center rounded-xl border border-[var(--lph-border)] bg-[var(--lph-bg-panel)] text-[var(--lph-orange)]">
+              <Folder className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <div>
+              <div className="lph-section-label mb-1">Projeto</div>
+              <h1 className="lph-brand-font text-4xl font-semibold leading-none">{project.name}</h1>
+            </div>
           </div>
           {project.description && (
             <p className="max-w-2xl text-sm leading-6 text-[var(--lph-text-muted)]">
@@ -72,17 +77,18 @@ export default function ProjectRoute() {
             onClick={startProjectChat}
           >
             <MessageSquarePlus className="h-4 w-4" aria-hidden="true" />
-            Novo chat no projeto
+            Nova conversa no projeto
           </button>
         </header>
 
-        <section className="grid gap-4 md:grid-cols-2">
-          <div className="lph-panel p-4">
-            <div className="mb-3 text-sm font-semibold text-[var(--lph-text)]">
-              Instruções do projeto
+        <section className="grid gap-4 lg:grid-cols-[1.05fr_0.95fr]">
+          <div className="lph-panel p-5">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--lph-text)]">
+              <Sparkles className="h-4 w-4 text-[var(--lph-orange)]" aria-hidden="true" />
+              Instruções
             </div>
             <textarea
-              className="lph-input min-h-40 w-full resize-none p-3 text-sm leading-6"
+              className="lph-input min-h-44 w-full resize-none p-4 text-sm leading-6"
               value={instructions}
               placeholder="Ex: responder em tom executivo, direto e comercial..."
               onChange={(event) => setInstructions(event.target.value)}
@@ -98,9 +104,10 @@ export default function ProjectRoute() {
             </button>
           </div>
 
-          <div className="lph-panel p-4">
-            <div className="mb-3 text-sm font-semibold text-[var(--lph-text)]">
-              Memórias do projeto
+          <div className="lph-panel p-5">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--lph-text)]">
+              <FileText className="h-4 w-4 text-[var(--lph-orange)]" aria-hidden="true" />
+              Memórias
             </div>
             <div className="mb-3 max-h-40 space-y-2 overflow-y-auto">
               {(memories?.memories ?? []).length === 0 ? (
@@ -134,7 +141,8 @@ export default function ProjectRoute() {
         </section>
 
         <section>
-          <div className="mb-3 text-sm font-semibold text-[var(--lph-text)]">
+          <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-[var(--lph-text)]">
+            <MessageSquare className="h-4 w-4 text-[var(--lph-orange)]" aria-hidden="true" />
             Conversas do projeto
           </div>
           <div className="space-y-2">

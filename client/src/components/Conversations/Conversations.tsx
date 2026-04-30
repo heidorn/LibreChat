@@ -47,7 +47,7 @@ const MeasuredRow: FC<MeasuredRowProps> = memo(
   ({ cache, rowKey, parent, index, style, children }) => (
     <CellMeasurer cache={cache} columnIndex={0} key={rowKey} parent={parent} rowIndex={index}>
       {({ registerChild }) => (
-        <div ref={registerChild as React.LegacyRef<HTMLDivElement>} style={style} className="px-3">
+        <div ref={registerChild as React.LegacyRef<HTMLDivElement>} style={style} className="px-1">
           {children}
         </div>
       )}
@@ -77,8 +77,10 @@ const DateLabel: FC<{ groupName: string; isFirst?: boolean }> = memo(({ groupNam
       aria-label={localize('com_a11y_chats_date_section', {
         date: localize(groupName as TranslationKeys) || groupName,
       })}
-      className={cn('pl-1 pt-1 text-text-secondary', isFirst === true ? 'mt-0' : 'mt-2')}
-      style={{ fontSize: '0.7rem' }}
+      className={cn(
+        'lph-conversation-date pl-2 pt-1 text-[var(--lph-text-faint)]',
+        isFirst === true ? 'mt-0' : 'mt-2',
+      )}
     >
       {localize(groupName as TranslationKeys) || groupName}
     </h2>
@@ -327,7 +329,7 @@ const Conversations: FC<ConversationsProps> = ({
   );
 
   return (
-    <div className="relative flex h-full min-h-0 flex-col pb-2 text-sm text-text-primary">
+    <div className="relative flex h-full min-h-0 flex-col pb-2 text-sm text-[var(--lph-text)]">
       {isSearchLoading ? (
         <div className="flex flex-1 items-center justify-center">
           <Spinner className="text-text-primary" />
@@ -347,7 +349,7 @@ const Conversations: FC<ConversationsProps> = ({
                 rowRenderer={rowRenderer}
                 overscanRowCount={10}
                 aria-readonly={false}
-                className="outline-none"
+                className="lph-conversation-virtual-list outline-none"
                 aria-label="Conversations"
                 onRowsRendered={handleRowsRendered}
                 tabIndex={-1}

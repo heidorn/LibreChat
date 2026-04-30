@@ -181,14 +181,16 @@ const ConversationsSection = memo(() => {
         Nova conversa
       </button>
 
-      <div className="lph-nav-item mb-6 flex min-h-10 items-center gap-2 px-2 text-sm font-medium">
-        <Search className="h-5 w-5 shrink-0" aria-hidden="true" />
+      <div className="mb-6 flex min-h-10 items-center text-sm font-medium">
         {search.enabled ? (
           <div className="min-w-0 flex-1">
             <SearchBar isSmallScreen={isSmallScreen} />
           </div>
         ) : (
-          <span>Buscar em chats</span>
+          <div className="lph-nav-item flex h-10 w-full items-center gap-3 px-2">
+            <Search className="h-5 w-5 shrink-0" aria-hidden="true" />
+            <span>Buscar em chats</span>
+          </div>
         )}
       </div>
 
@@ -227,7 +229,7 @@ const ConversationsSection = memo(() => {
         </div>
       </div>
 
-      <div className="flex min-h-0 flex-grow flex-col overflow-hidden">
+      <div className="lph-conversations-list flex min-h-0 flex-grow flex-col overflow-hidden">
         <div className="lph-section-label mb-2 px-2">Recentes</div>
         <Conversations
           conversations={conversations}
