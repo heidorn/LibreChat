@@ -57,33 +57,47 @@ function AuthLayout({
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col bg-white dark:bg-gray-900">
+    <div className="lph-auth-page relative flex min-h-screen flex-col overflow-hidden">
       <Banner />
       <BlinkAnimation active={isFetching}>
-        <div className="mt-6 flex h-20 w-full justify-center">
-          <div className="flex h-16 w-[300px] max-w-[82vw] items-center justify-center rounded-2xl bg-white px-5 shadow-sm">
+        <div className="relative z-10 mt-7 flex w-full justify-center">
+          <div className="lph-auth-brand flex items-center gap-3">
             <img
-              src="assets/leads-per-hour/logo.png"
-              className="h-12 w-full object-contain"
-              alt={localize('com_ui_logo', { 0: startupConfig?.appTitle ?? 'Leads Per Hour' })}
+              src="assets/leads-per-hour/icon.png"
+              className="h-9 w-9 rounded-lg"
+              alt=""
+              aria-hidden="true"
             />
+            <div>
+              <div className="lph-brand-font text-xl font-semibold leading-none text-[var(--lph-text)]">
+                Leads Per Hour
+              </div>
+              <div className="mt-1 text-[0.65rem] font-bold uppercase tracking-[0.22em] text-[var(--lph-orange)]">
+                AI Workspace
+              </div>
+            </div>
           </div>
         </div>
       </BlinkAnimation>
       <DisplayError />
-      <div className="absolute bottom-0 left-0 md:m-4">
+      <div className="absolute bottom-0 left-0 z-10 md:m-4">
         <ThemeSelector />
       </div>
 
-      <main className="flex flex-grow items-center justify-center">
-        <div className="w-authPageWidth overflow-hidden bg-white px-6 py-4 dark:bg-gray-900 sm:max-w-md sm:rounded-lg">
+      <main className="relative z-10 flex flex-grow items-center justify-center px-4 py-10">
+        <div className="lph-auth-card w-full max-w-md overflow-hidden px-7 py-7 sm:px-8">
           {!hasStartupConfigError && !isFetching && header && (
             <h1
-              className="mb-4 text-center text-3xl font-semibold text-black dark:text-white"
+              className="lph-brand-font mb-2 text-center text-4xl font-semibold text-[var(--lph-text)]"
               style={{ userSelect: 'none' }}
             >
               {header}
             </h1>
+          )}
+          {!hasStartupConfigError && !isFetching && (
+            <p className="mb-6 text-center text-sm text-[var(--lph-text-muted)]">
+              Entre para continuar seu trabalho no Leads Per Hour.
+            </p>
           )}
           {children}
           {!pathname.includes('2fa') &&
