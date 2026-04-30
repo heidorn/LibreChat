@@ -463,16 +463,23 @@ class BaseClient {
      */
     const parentMessageId = isEdited ? head : userMessage.messageId;
     this.parentMessageId = parentMessageId;
-    let {
-      prompt: payload,
-      tokenCountMap,
-      promptTokens,
-    } = await this.buildMessages(
-      this.currentMessages,
-      parentMessageId,
-      this.getBuildMessagesOptions(opts),
-      opts,
-    );
+    const restoreUserMessageText = await this.prepareCurrentAttachmentsForPrompt(userMessage);
+    let payload;
+    let tokenCountMap;
+    let promptTokens;
+    try {
+      const buildResult = await this.buildMessages(
+        this.currentMessages,
+        parentMessageId,
+        this.getBuildMessagesOptions(opts),
+        opts,
+      );
+      payload = buildResult.prompt;
+      tokenCountMap = buildResult.tokenCountMap;
+      promptTokens = buildResult.promptTokens;
+    } finally {
+      restoreUserMessageText();
+    }
 
     if (tokenCountMap && tokenCountMap[userMessage.messageId]) {
       userMessage.tokenCount = tokenCountMap[userMessage.messageId];
@@ -1103,6 +1110,41 @@ class BaseClient {
     return await this.sendCompletion(payload, opts);
   }
 
+  async prepareCurrentAttachmentsForPrompt(message) {
+    if (!this.options.attachments || this.clientName === EModelEndpoint.agents) {
+      return () => {};
+    }
+
+    const attachments = await this.options.attachments;
+    if (!Array.isArray(attachments) || attachments.length === 0) {
+      this.options.attachments = [];
+      return () => {};
+    }
+
+    this.message_file_map = {
+      ...(this.message_file_map ?? {}),
+      [message.messageId]: attachments,
+    };
+
+    await this.addFileContextToMessage(message, attachments);
+    this.options.attachments = await this.processAttachments(message, attachments);
+
+    if (typeof this.checkVisionRequest === 'function') {
+      this.checkVisionRequest(attachments);
+    }
+
+    if (!message.fileContext || typeof message.text !== 'string') {
+      return () => {};
+    }
+
+    const originalText = message.text;
+    message.text = `${message.fileContext}\n\n${originalText}`;
+
+    return () => {
+      message.text = originalText;
+    };
+  }
+
   async addDocuments(message, attachments) {
     const documentResult = await encodeAndFormatDocuments(
       this.options.req,
@@ -1150,6 +1192,10 @@ class BaseClient {
     message.audios =
       audioResult.audios && audioResult.audios.length ? audioResult.audios : undefined;
     return audioResult.files;
+  }
+
+  async addImageURLs(_message, attachments) {
+    return attachments;
   }
 
   /**

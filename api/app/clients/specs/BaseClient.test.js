@@ -1258,7 +1258,7 @@ describe('BaseClient', () => {
       expect(userSave[0].files).toBeUndefined();
     });
 
-    test('skips file population when attachments is not an array (Promise case)', async () => {
+    test('resolves promise attachments before building and saving the user message', async () => {
       TestClient.options.attachments = Promise.resolve([attachment]);
       TestClient.saveMessageToDatabase = jest.fn().mockResolvedValue({ message: {} });
 
@@ -1267,7 +1267,40 @@ describe('BaseClient', () => {
       const userSave = TestClient.saveMessageToDatabase.mock.calls.find(
         ([msg]) => msg.isCreatedByUser,
       );
-      expect(userSave[0].files).toBeUndefined();
+      expect(userSave[0].files).toHaveLength(1);
+      expect(userSave[0].files[0].file_id).toBe('file-abc');
+    });
+
+    test('adds extracted text attachments to the prompt without saving the context in user text', async () => {
+      const textAttachment = {
+        ...attachment,
+        filename: 'briefing.docx',
+        source: 'text',
+        type: 'text/plain',
+        text: 'DOCX_Codex_Leads_Per_Hour_424242',
+      };
+      TestClient.options.req = {
+        body: {
+          files: [{ file_id: textAttachment.file_id }],
+        },
+      };
+      TestClient.options.attachments = Promise.resolve([textAttachment]);
+      TestClient.addFileContextToMessage = jest.fn(async (message) => {
+        message.fileContext =
+          'Attached document(s):\n```md\n# "briefing.docx"\nDOCX_Codex_Leads_Per_Hour_424242\n```';
+      });
+      TestClient.saveMessageToDatabase = jest.fn().mockResolvedValue({ message: {} });
+
+      await TestClient.sendMessage('What is in the file?');
+
+      const prompt = TestClient.sendCompletion.mock.calls[0][0];
+      expect(prompt[0].content).toContain('DOCX_Codex_Leads_Per_Hour_424242');
+      expect(prompt[0].content).toContain('What is in the file?');
+
+      const userSave = TestClient.saveMessageToDatabase.mock.calls.find(
+        ([msg]) => msg.isCreatedByUser,
+      );
+      expect(userSave[0].text).toBe('What is in the file?');
     });
 
     test('skips file population when skipSaveUserMessage is true', async () => {
