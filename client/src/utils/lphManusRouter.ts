@@ -31,7 +31,7 @@ const IMAGE_ACTION_TERMS =
   /\b(crie|cria|criar|gere|gera|gerar|desenhe|desenha|produza|faca|faça|make|generate|create)\b/i;
 
 const WEB_TERMS =
-  /\b(hoje|agora|atual|atuais|recente|recentes|noticia|notícias|preco|preço|cotacao|cotação|pesquise|pesquisar|procure|procurar|busque|buscar|web|internet|fonte|fontes|link|links)\b/i;
+  /\b(hoje|agora|atual|atuais|ultima|última|ultimas|últimas|semana|semanal|recente|recentes|noticia|noticias|notícia|notícias|preco|preço|cotacao|cotação|pesquise|pesquisar|procure|procurar|busque|buscar|web|internet|fonte|fontes|link|links)\b/i;
 
 const FILE_ANALYSIS_TERMS =
   /\b(analisar|analise|análise|resumir|resuma|extrair|compare|comparar|tabela|planilha|xlsx|csv|pdf|docx|arquivo|arquivos|contrato|documento|dados|dashboard)\b/i;
