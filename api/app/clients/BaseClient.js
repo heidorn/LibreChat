@@ -30,6 +30,68 @@ const { logViolation } = require('~/cache');
 const TextStream = require('./TextStream');
 const db = require('~/models');
 
+const TEXT_ONLY_ATTACHMENT_ENDPOINTS = new Set([
+  'deepseek',
+  'perplexity',
+  'groq',
+  'openrouter',
+  'moonshot',
+  'xai',
+  'kimi',
+]);
+
+const NATIVE_ATTACHMENT_ENDPOINTS = new Set([
+  EModelEndpoint.openAI,
+  EModelEndpoint.azureOpenAI,
+  EModelEndpoint.anthropic,
+  EModelEndpoint.google,
+  EModelEndpoint.bedrock,
+  'openai',
+  'google',
+  'anthropic',
+  'vertexai',
+  'vertex',
+  'bedrock',
+  'mistral',
+  'mistralai',
+]);
+
+const getAttachmentEndpointHints = (options = {}) => {
+  const hints = [
+    options.endpoint,
+    options.endpointType,
+    options.agent?.endpoint,
+    options.agent?.provider,
+    options.agent?.model_parameters?.provider,
+    options.modelOptions?.endpoint,
+    options.modelOptions?.endpointType,
+    options.modelOptions?.model,
+    options.modelOptions?.modelLabel,
+    options.model,
+    options.modelLabel,
+  ];
+
+  return hints
+    .filter((hint) => typeof hint === 'string' && hint.trim())
+    .map((hint) => hint.trim().toLowerCase());
+};
+
+const shouldSendNativeAttachmentBlocks = (options = {}) => {
+  const hints = getAttachmentEndpointHints(options);
+
+  if (
+    hints.some((hint) =>
+      Array.from(TEXT_ONLY_ATTACHMENT_ENDPOINTS).some((endpoint) => hint.includes(endpoint)),
+    )
+  ) {
+    return false;
+  }
+
+  return hints.some((hint) =>
+    Array.from(NATIVE_ATTACHMENT_ENDPOINTS).some((endpoint) => hint === endpoint),
+  );
+};
+
 class BaseClient {
   constructor(apiKey, options = {}) {
     this.apiKey = apiKey;
@@ -1245,6 +1307,7 @@ class BaseClient {
 
     const provider = this.options.agent?.provider ?? this.options.endpoint;
     const isBedrock = provider === EModelEndpoint.bedrock;
+    const sendNativeAttachmentBlocks = shouldSendNativeAttachmentBlocks(this.options);
 
     if (!this._mergedFileConfig && this.options.req?.config?.fileConfig) {
       this._mergedFileConfig = mergeFileConfig(this.options.req.config.fileConfig);
@@ -1257,6 +1320,11 @@ class BaseClient {
     }
 
     for (const file of attachments) {
+      if (!sendNativeAttachmentBlocks) {
+        allFiles.push(file);
+        continue;
+      }
+
       /** @type {FileSources} */
       const source = file.source ?? FileSources.local;
       if (source === FileSources.text) {

@@ -1,4 +1,4 @@
-const { Constants } = require('librechat-data-provider');
+const { Constants, EModelEndpoint } = require('librechat-data-provider');
 const { initializeFakeClient } = require('./FakeClient');
 
 jest.mock('~/db/connect');
@@ -1355,6 +1355,67 @@ describe('BaseClient', () => {
         ([msg]) => msg.isCreatedByUser,
       );
       expect(userSave[0].text).toBe('What is in the file?');
+    });
+
+    test('does not send native file blocks to text-only custom providers', async () => {
+      const pdfAttachment = {
+        ...attachment,
+        filename: 'proposal.pdf',
+        type: 'application/pdf',
+        source: 'local',
+      };
+      TestClient.options.endpoint = 'DeepSeek';
+      TestClient.options.endpointType = EModelEndpoint.custom;
+      TestClient.addDocuments = jest.fn(async (message) => {
+        message.documents = [{ type: 'file', file: { filename: pdfAttachment.filename } }];
+        return [pdfAttachment];
+      });
+
+      const files = await TestClient.processAttachments({}, [pdfAttachment]);
+
+      expect(TestClient.addDocuments).not.toHaveBeenCalled();
+      expect(files).toHaveLength(1);
+      expect(files[0].file_id).toBe(pdfAttachment.file_id);
+    });
+
+    test('does not send native image blocks to text-only custom providers', async () => {
+      TestClient.options.endpoint = 'Perplexity';
+      TestClient.options.endpointType = EModelEndpoint.custom;
+      TestClient.addImageURLs = jest.fn(async (message) => {
+        message.image_urls = [{ type: 'image_url', image_url: { url: 'data:image/png;base64,...' } }];
+        return [attachment];
+      });
+
+      const message = {};
+      const files = await TestClient.processAttachments(message, [attachment]);
+
+      expect(TestClient.addImageURLs).not.toHaveBeenCalled();
+      expect(message.image_urls).toBeUndefined();
+      expect(files).toHaveLength(1);
+      expect(files[0].file_id).toBe(attachment.file_id);
+    });
+
+    test('keeps native document blocks for providers that support them', async () => {
+      const pdfAttachment = {
+        ...attachment,
+        filename: 'proposal.pdf',
+        type: 'application/pdf',
+        source: 'local',
+      };
+      const message = {};
+      TestClient.options.endpoint = EModelEndpoint.openAI;
+      TestClient.options.endpointType = EModelEndpoint.openAI;
+      TestClient.addDocuments = jest.fn(async (msg) => {
+        msg.documents = [{ type: 'input_file', filename: pdfAttachment.filename }];
+        return [pdfAttachment];
+      });
+
+      const files = await TestClient.processAttachments(message, [pdfAttachment]);
+
+      expect(TestClient.addDocuments).toHaveBeenCalledWith(message, [pdfAttachment]);
+      expect(message.documents).toEqual([{ type: 'input_file', filename: pdfAttachment.filename }]);
+      expect(files).toHaveLength(1);
+      expect(files[0].file_id).toBe(pdfAttachment.file_id);
     });
 
     test('skips file population when skipSaveUserMessage is true', async () => {
