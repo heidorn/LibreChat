@@ -67,7 +67,7 @@ const basePrompt =
   'Você é a Leads Per Hour, um assistente de IA geral, claro e prático. Ajude o usuário com escrita, pesquisa, análise, imagens, arquivos, ideias, planejamento e execução. Não force nenhum contexto específico a menos que o usuário peça.';
 
 export const isLphManusConversation = (conversation?: TConversation | null) =>
-  conversation?.spec === LPH_MANUS_SPEC || conversation?.modelLabel === 'LPH Manus';
+  conversation?.spec === LPH_MANUS_SPEC || conversation?.modelLabel?.startsWith('LPH Manus');
 
 export const getLphManusRoute = ({
   text,
