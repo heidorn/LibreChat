@@ -14,13 +14,15 @@ import { cn } from '~/utils';
 import store from '~/store';
 
 const COLLAPSED_WIDTH = 52;
-const EXPANDED_MIN = 360;
+const EXPANDED_MIN = 280;
+const EXPANDED_MAX = 340;
 const TRANSITION_MS = 300;
 const EASING = 'cubic-bezier(0.2, 0, 0, 1)';
 
 function getInitialWidth(): number {
   const saved = localStorage.getItem('side:width');
-  return saved ? Math.max(Number(saved), EXPANDED_MIN) : EXPANDED_MIN;
+  const savedWidth = saved ? Number(saved) : EXPANDED_MIN;
+  return Math.max(EXPANDED_MIN, Math.min(savedWidth, EXPANDED_MAX));
 }
 
 /**
@@ -64,7 +66,7 @@ function UnifiedSidebar() {
   const handleResizeStart = useCallback(() => {
     setIsResizing(true);
     document.body.style.userSelect = 'none';
-    const maxWidth = window.innerWidth * 0.4;
+    const maxWidth = Math.min(window.innerWidth * 0.4, EXPANDED_MAX);
     let rafId: number | null = null;
 
     const move = (e: MouseEvent) => {
@@ -104,7 +106,7 @@ function UnifiedSidebar() {
       const next =
         direction === 'shrink'
           ? Math.max(w - 20, EXPANDED_MIN)
-          : Math.min(w + 20, window.innerWidth * 0.4);
+          : Math.min(w + 20, Math.min(window.innerWidth * 0.4, EXPANDED_MAX));
       localStorage.setItem('side:width', String(Math.round(next)));
       return next;
     });
@@ -149,7 +151,7 @@ function UnifiedSidebar() {
           <SidebarChatProvider>
             <ActivePanelProvider>
               <ExpandedPanel links={links} onCollapse={handleCollapse} />
-              <nav className="min-h-0 flex-1 overflow-hidden bg-surface-primary-alt">
+              <nav className="lph-sidebar-shell min-h-0 flex-1 overflow-hidden">
                 <SidePanelNav links={links} />
               </nav>
             </ActivePanelProvider>
@@ -182,7 +184,7 @@ function UnifiedSidebar() {
           style={{
             width: expanded ? sidebarWidth : COLLAPSED_WIDTH,
             minWidth: expanded ? EXPANDED_MIN : COLLAPSED_WIDTH,
-            maxWidth: expanded ? '40%' : COLLAPSED_WIDTH,
+            maxWidth: expanded ? EXPANDED_MAX : COLLAPSED_WIDTH,
             transition: isResizing
               ? 'none'
               : `width ${TRANSITION_MS}ms ${EASING}, min-width ${TRANSITION_MS}ms ${EASING}, max-width ${TRANSITION_MS}ms ${EASING}`,

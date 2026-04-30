@@ -7,13 +7,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import type { InfiniteQueryObserverResult } from '@tanstack/react-query';
 import type { ConversationListResponse } from 'librechat-data-provider';
 import type { List } from 'react-virtualized';
-import {
-  useLocalize,
-  useHasAccess,
-  useAuthContext,
-  useNavScrolling,
-  useNewConvo,
-} from '~/hooks';
+import { useLocalize, useHasAccess, useAuthContext, useNavScrolling, useNewConvo } from '~/hooks';
 import {
   useConversationsInfiniteQuery,
   useCreateProjectMutation,
@@ -22,6 +16,7 @@ import {
 } from '~/data-provider';
 import { Conversations } from '~/components/Conversations';
 import SearchBar from '~/components/Nav/SearchBar';
+import { cn } from '~/utils';
 import store from '~/store';
 
 const BookmarkNav = lazy(() => import('~/components/Nav/Bookmarks/BookmarkNav'));
@@ -90,7 +85,10 @@ const ConversationsSection = memo(() => {
     return data ? data.pages.flatMap((page) => page.conversations) : [];
   }, [data]);
 
-  const projects = useMemo(() => projectsQuery.data?.projects ?? [], [projectsQuery.data?.projects]);
+  const projects = useMemo(
+    () => projectsQuery.data?.projects ?? [],
+    [projectsQuery.data?.projects],
+  );
   const visibleProjects = useMemo(() => projects.slice(0, 6), [projects]);
   const activeProjectId = useMemo(() => {
     const fromSearch = searchParams.get('projectId');
@@ -155,22 +153,24 @@ const ConversationsSection = memo(() => {
 
   return (
     <div
-      className="flex h-full min-h-0 flex-col overflow-hidden px-3 pb-3 pt-4"
+      className="lph-sidebar-shell flex h-full min-h-0 flex-col overflow-hidden px-3 pb-3 pt-4"
       role="region"
       aria-label={localize('com_ui_chat_history')}
     >
-      <div className="mb-5 flex items-center gap-3 px-1">
+      <div className="mb-6 flex items-center gap-3 px-1">
         <img
           src="assets/leads-per-hour/icon.png"
           alt="Leads Per Hour"
           className="h-8 w-8 rounded-lg"
         />
-        <span className="truncate text-base font-semibold text-text-primary">Leads Per Hour</span>
+        <span className="lph-brand-font truncate text-lg font-semibold text-[#faf9f5]">
+          Leads Per Hour
+        </span>
       </div>
 
       <button
         type="button"
-        className="mb-2 flex h-10 w-full items-center gap-3 rounded-lg px-2 text-sm font-medium text-text-primary hover:bg-surface-active-alt"
+        className="lph-nav-item mb-2 flex h-10 w-full items-center gap-3 px-2 text-sm font-semibold"
         onClick={() =>
           newConversation({
             template: activeProjectId ? { projectId: activeProjectId } : undefined,
@@ -178,10 +178,10 @@ const ConversationsSection = memo(() => {
         }
       >
         <SquarePen className="h-5 w-5" aria-hidden="true" />
-        Novo chat
+        Nova conversa
       </button>
 
-      <div className="mb-5 flex items-center gap-2 rounded-lg px-2 text-sm text-text-primary hover:bg-surface-active-alt">
+      <div className="lph-nav-item mb-6 flex min-h-10 items-center gap-2 px-2 text-sm font-medium">
         <Search className="h-5 w-5 shrink-0" aria-hidden="true" />
         {search.enabled ? (
           <div className="min-w-0 flex-1">
@@ -193,13 +193,11 @@ const ConversationsSection = memo(() => {
       </div>
 
       <div className="mb-5">
-        <div className="mb-2 px-2 text-xs font-semibold uppercase tracking-normal text-text-secondary">
-          Projetos
-        </div>
+        <div className="lph-section-label mb-2 px-2">Projetos</div>
         <div className="space-y-1">
           <button
             type="button"
-            className="flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm text-text-primary hover:bg-surface-active-alt"
+            className="lph-nav-item flex h-9 w-full items-center gap-3 px-2 text-sm font-medium"
             onClick={() => setIsProjectModalOpen(true)}
           >
             <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -209,7 +207,10 @@ const ConversationsSection = memo(() => {
             <button
               key={project.projectId}
               type="button"
-              className="flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm text-text-primary hover:bg-surface-active-alt"
+              className={cn(
+                'lph-nav-item flex h-9 w-full items-center gap-3 px-2 text-sm font-medium',
+                project.projectId === activeProjectId && 'lph-nav-item-active',
+              )}
               onClick={() => openProject(project.projectId)}
             >
               <Folder className="h-4 w-4 shrink-0" aria-hidden="true" />
@@ -218,7 +219,7 @@ const ConversationsSection = memo(() => {
           ))}
           <button
             type="button"
-            className="flex h-9 w-full items-center gap-3 rounded-lg px-2 text-sm text-text-primary hover:bg-surface-active-alt"
+            className="lph-nav-item flex h-9 w-full items-center gap-3 px-2 text-sm font-medium"
           >
             <MoreHorizontal className="h-4 w-4 shrink-0" aria-hidden="true" />
             <span>Mais</span>
@@ -227,9 +228,7 @@ const ConversationsSection = memo(() => {
       </div>
 
       <div className="flex min-h-0 flex-grow flex-col overflow-hidden">
-        <div className="mb-2 px-2 text-xs font-semibold uppercase tracking-normal text-text-secondary">
-          Recentes
-        </div>
+        <div className="lph-section-label mb-2 px-2">Recentes</div>
         <Conversations
           conversations={conversations}
           moveToTop={moveToTop}
@@ -243,7 +242,7 @@ const ConversationsSection = memo(() => {
         />
       </div>
 
-      <div className="mt-3 border-t border-border-light pt-3">
+      <div className="mt-3 border-t border-[var(--lph-border-soft)] pt-3">
         {hasAccessToBookmarks && (
           <div className="hidden">
             <Suspense fallback={null}>
@@ -258,24 +257,29 @@ const ConversationsSection = memo(() => {
 
       {isProjectModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-          <div className="w-full max-w-md rounded-xl border border-border-light bg-surface-primary p-5 shadow-2xl">
+          <div className="lph-panel w-full max-w-md p-5 shadow-2xl">
             <div className="mb-5 flex items-center justify-between">
-              <h2 className="text-lg font-semibold text-text-primary">Criar projeto</h2>
+              <h2 className="lph-brand-font text-2xl font-semibold text-[var(--lph-text)]">
+                Criar projeto
+              </h2>
               <button
                 type="button"
-                className="rounded-lg p-2 text-text-secondary hover:bg-surface-active-alt hover:text-text-primary"
+                className="rounded-lg p-2 text-[var(--lph-text-muted)] hover:bg-[var(--lph-bg-panel-hover)] hover:text-[var(--lph-text)]"
                 aria-label="Fechar"
                 onClick={() => setIsProjectModalOpen(false)}
               >
                 <X className="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
-            <label className="mb-2 block text-sm font-medium text-text-primary" htmlFor="project-name">
+            <label
+              className="mb-2 block text-sm font-medium text-[var(--lph-text)]"
+              htmlFor="project-name"
+            >
               Nome do projeto
             </label>
             <input
               id="project-name"
-              className="h-11 w-full rounded-lg border border-border-light bg-surface-secondary px-3 text-sm text-text-primary outline-none focus:border-text-primary"
+              className="lph-input h-11 w-full px-3 text-sm"
               value={projectName}
               placeholder="Ex: Cliente ACME"
               onChange={(event) => setProjectName(event.target.value)}
@@ -289,7 +293,7 @@ const ConversationsSection = memo(() => {
             <div className="mt-5 flex justify-end">
               <button
                 type="button"
-                className="rounded-full bg-text-primary px-5 py-2 text-sm font-medium text-surface-primary disabled:opacity-50"
+                className="lph-primary-button px-5 py-2 text-sm"
                 disabled={!projectName.trim() || createProject.isLoading}
                 onClick={handleCreateProject}
               >

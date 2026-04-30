@@ -23,7 +23,7 @@ function Sidebar({
     <>
       <div className="flex h-full w-full overflow-hidden">
         {expanded ? (
-          <nav className="min-h-0 flex-1 overflow-hidden bg-surface-primary-alt">
+          <nav className="lph-sidebar-shell min-h-0 flex-1 overflow-hidden">
             <SidePanelNav links={links} />
           </nav>
         ) : (

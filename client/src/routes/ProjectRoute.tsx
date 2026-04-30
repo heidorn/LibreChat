@@ -26,16 +26,14 @@ export default function ProjectRoute() {
 
   if (!project) {
     return (
-      <div className="flex h-full items-center justify-center text-text-secondary">
+      <div className="flex h-full items-center justify-center bg-[var(--lph-bg-app)] text-[var(--lph-text-muted)]">
         Carregando projeto...
       </div>
     );
   }
 
   const startProjectChat = () => {
-    navigate(
-      `/c/new?projectId=${encodeURIComponent(project.projectId)}&projectChat=${Date.now()}`,
-    );
+    navigate(`/c/new?projectId=${encodeURIComponent(project.projectId)}&projectChat=${Date.now()}`);
   };
 
   const saveInstructions = () => {
@@ -56,19 +54,21 @@ export default function ProjectRoute() {
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-surface-primary px-6 py-8 text-text-primary">
-      <div className="mx-auto flex w-full max-w-4xl flex-col gap-8">
-        <header className="flex flex-col gap-4">
+    <div className="h-full overflow-y-auto bg-[var(--lph-bg-app)] px-6 py-8 text-[var(--lph-text)]">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8">
+        <header className="flex flex-col gap-5">
           <div className="flex items-center gap-3">
-            <Folder className="h-7 w-7 text-text-secondary" aria-hidden="true" />
-            <h1 className="text-3xl font-semibold">{project.name}</h1>
+            <Folder className="h-8 w-8 text-[var(--lph-text-muted)]" aria-hidden="true" />
+            <h1 className="lph-brand-font text-4xl font-semibold">{project.name}</h1>
           </div>
           {project.description && (
-            <p className="max-w-2xl text-sm text-text-secondary">{project.description}</p>
+            <p className="max-w-2xl text-sm leading-6 text-[var(--lph-text-muted)]">
+              {project.description}
+            </p>
           )}
           <button
             type="button"
-            className="flex h-11 w-fit items-center gap-2 rounded-full bg-text-primary px-5 text-sm font-medium text-surface-primary"
+            className="lph-primary-button flex h-11 w-fit items-center gap-2 px-5 text-sm"
             onClick={startProjectChat}
           >
             <MessageSquarePlus className="h-4 w-4" aria-hidden="true" />
@@ -77,17 +77,19 @@ export default function ProjectRoute() {
         </header>
 
         <section className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-lg border border-border-light bg-surface-secondary p-4">
-            <div className="mb-3 text-sm font-semibold">Instruções do projeto</div>
+          <div className="lph-panel p-4">
+            <div className="mb-3 text-sm font-semibold text-[var(--lph-text)]">
+              Instruções do projeto
+            </div>
             <textarea
-              className="min-h-40 w-full resize-none rounded-lg border border-border-light bg-surface-primary p-3 text-sm outline-none focus:border-text-primary"
+              className="lph-input min-h-40 w-full resize-none p-3 text-sm leading-6"
               value={instructions}
               placeholder="Ex: responder em tom executivo, direto e comercial..."
               onChange={(event) => setInstructions(event.target.value)}
             />
             <button
               type="button"
-              className="mt-3 flex h-9 items-center gap-2 rounded-full bg-text-primary px-4 text-sm font-medium text-surface-primary disabled:opacity-50"
+              className="lph-primary-button mt-3 flex h-9 items-center gap-2 px-4 text-sm"
               disabled={updateProject.isLoading}
               onClick={saveInstructions}
             >
@@ -96,16 +98,18 @@ export default function ProjectRoute() {
             </button>
           </div>
 
-          <div className="rounded-lg border border-border-light bg-surface-secondary p-4">
-            <div className="mb-3 text-sm font-semibold">Memórias do projeto</div>
+          <div className="lph-panel p-4">
+            <div className="mb-3 text-sm font-semibold text-[var(--lph-text)]">
+              Memórias do projeto
+            </div>
             <div className="mb-3 max-h-40 space-y-2 overflow-y-auto">
               {(memories?.memories ?? []).length === 0 ? (
-                <p className="text-sm text-text-secondary">Nenhuma memória salva ainda.</p>
+                <p className="text-sm text-[var(--lph-text-muted)]">Nenhuma memória salva ainda.</p>
               ) : (
                 memories?.memories.map((item) => (
                   <div
                     key={item.memoryId}
-                    className="rounded-md bg-surface-primary px-3 py-2 text-sm text-text-primary"
+                    className="rounded-md border border-[var(--lph-border-soft)] bg-[#151514] px-3 py-2 text-sm text-[var(--lph-text)]"
                   >
                     {item.content}
                   </div>
@@ -113,14 +117,14 @@ export default function ProjectRoute() {
               )}
             </div>
             <textarea
-              className="min-h-24 w-full resize-none rounded-lg border border-border-light bg-surface-primary p-3 text-sm outline-none focus:border-text-primary"
+              className="lph-input min-h-24 w-full resize-none p-3 text-sm leading-6"
               value={memory}
               placeholder="Salvar uma memória manual deste projeto..."
               onChange={(event) => setMemory(event.target.value)}
             />
             <button
               type="button"
-              className="mt-3 h-9 rounded-full bg-text-primary px-4 text-sm font-medium text-surface-primary disabled:opacity-50"
+              className="lph-primary-button mt-3 h-9 px-4 text-sm"
               disabled={createMemory.isLoading || !memory.trim()}
               onClick={saveMemory}
             >
@@ -130,10 +134,12 @@ export default function ProjectRoute() {
         </section>
 
         <section>
-          <div className="mb-3 text-sm font-semibold">Conversas do projeto</div>
+          <div className="mb-3 text-sm font-semibold text-[var(--lph-text)]">
+            Conversas do projeto
+          </div>
           <div className="space-y-2">
             {(conversations?.conversations ?? []).length === 0 ? (
-              <p className="text-sm text-text-secondary">
+              <p className="text-sm text-[var(--lph-text-muted)]">
                 As conversas criadas neste projeto vão aparecer aqui.
               </p>
             ) : (
@@ -141,7 +147,7 @@ export default function ProjectRoute() {
                 <button
                   key={conversation.conversationId}
                   type="button"
-                  className="flex w-full items-center justify-between rounded-lg border border-border-light bg-surface-secondary px-4 py-3 text-left hover:bg-surface-active-alt"
+                  className="flex w-full items-center justify-between rounded-lg border border-[var(--lph-border)] bg-[var(--lph-bg-panel)] px-4 py-3 text-left text-[var(--lph-text)] hover:bg-[var(--lph-bg-panel-hover)]"
                   onClick={() =>
                     navigate(
                       `/c/${conversation.conversationId}?projectId=${encodeURIComponent(
@@ -153,7 +159,7 @@ export default function ProjectRoute() {
                   <span className="truncate text-sm font-medium">
                     {conversation.title || 'Nova conversa'}
                   </span>
-                  <span className="text-xs text-text-secondary">
+                  <span className="text-xs text-[var(--lph-text-muted)]">
                     {conversation.updatedAt
                       ? new Date(conversation.updatedAt).toLocaleDateString()
                       : ''}
