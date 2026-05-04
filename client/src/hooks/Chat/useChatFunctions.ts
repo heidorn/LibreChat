@@ -146,10 +146,13 @@ export default function useChatFunctions({
         agentsMap,
       });
       const routedPromptPrefix =
-        conversation.promptPrefix || route.conversation.promptPrefix || undefined;
+        route.conversation.promptPrefix || conversation.promptPrefix || undefined;
       Object.assign(conversation, route.conversation);
       conversation.spec = selectedSpec;
       conversation.promptPrefix = routedPromptPrefix;
+      if (conversation.endpoint !== EModelEndpoint.agents) {
+        conversation.agent_id = Constants.EPHEMERAL_AGENT_ID;
+      }
       logger.info('lph_manus_router', {
         kind: route.kind,
         reason: route.reason,

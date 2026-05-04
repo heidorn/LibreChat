@@ -235,8 +235,10 @@ const useNewConvo = (index = 0) => {
 
         const getParams = () => {
           const params = new URLSearchParams(searchParams);
-          if (conversation.projectId && !params.get('projectId')) {
-            params.set('projectId', conversation.projectId);
+          const projectId =
+            conversation.projectId ?? new URLSearchParams(window.location.search).get('projectId');
+          if (projectId && !params.get('projectId')) {
+            params.set('projectId', projectId);
           }
           const searchParamsString = params.toString();
           return searchParamsString ? `?${searchParamsString}` : '';

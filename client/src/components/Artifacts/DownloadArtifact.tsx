@@ -18,7 +18,11 @@ const DownloadArtifact = ({ artifact }: { artifact: Artifact }) => {
       if (!content) {
         return;
       }
-      const blob = new Blob([content], { type: 'text/plain' });
+      const mimeType =
+        artifact.type === 'text/html' || artifact.type === 'application/vnd.code-html'
+          ? 'text/html'
+          : 'text/plain';
+      const blob = new Blob([content], { type: mimeType });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;

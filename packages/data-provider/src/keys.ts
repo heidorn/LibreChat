@@ -51,6 +51,7 @@ export enum QueryKeys {
   projects = 'projects',
   project = 'project',
   projectConversations = 'projectConversations',
+  projectArtifacts = 'projectArtifacts',
   projectMemories = 'projectMemories',
   health = 'health',
   userTerms = 'userTerms',

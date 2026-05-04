@@ -33,7 +33,12 @@ export default function ProjectRoute() {
   }
 
   const startProjectChat = () => {
-    navigate(`/c/new?projectId=${encodeURIComponent(project.projectId)}&projectChat=${Date.now()}`);
+    navigate(
+      `/c/new?projectId=${encodeURIComponent(project.projectId)}&projectChat=${Date.now()}`,
+      {
+        state: { focusChat: true, projectId: project.projectId, spec: 'lph-manus' },
+      },
+    );
   };
 
   const saveInstructions = () => {

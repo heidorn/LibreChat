@@ -2,6 +2,7 @@ const express = require('express');
 const { logger } = require('@librechat/data-schemas');
 const requireJwtAuth = require('~/server/middleware/requireJwtAuth');
 const db = require('~/models');
+const { renderArtifactPdf, safePdfFilename } = require('~/server/services/Artifacts/exportPdf');
 
 const router = express.Router();
 router.use(requireJwtAuth);
@@ -136,6 +137,85 @@ router.post('/:projectId/files', async (req, res) => {
   } catch (error) {
     logger.error('[projects] Error adding project file', error);
     res.status(400).json({ error: error.message || 'Error adding project file' });
+  }
+});
+
+router.get('/:projectId/artifacts', async (req, res) => {
+  try {
+    const artifacts = await db.getProjectArtifacts(getUserId(req), req.params.projectId);
+    res.status(200).json({ artifacts });
+  } catch (error) {
+    logger.error('[projects] Error listing project artifacts', error);
+    res.status(500).json({ error: 'Error listing project artifacts' });
+  }
+});
+
+router.get('/:projectId/artifacts/:artifactId', async (req, res) => {
+  try {
+    const artifact = await db.getProjectArtifact(
+      getUserId(req),
+      req.params.projectId,
+      req.params.artifactId,
+    );
+    if (!artifact) {
+      return res.status(404).json({ error: 'Artifact not found' });
+    }
+    res.status(200).json(artifact);
+  } catch (error) {
+    logger.error('[projects] Error getting project artifact', error);
+    res.status(500).json({ error: 'Error getting project artifact' });
+  }
+});
+
+router.get('/:projectId/artifacts/:artifactId/export/pdf', async (req, res) => {
+  try {
+    const artifact = await db.getProjectArtifact(
+      getUserId(req),
+      req.params.projectId,
+      req.params.artifactId,
+    );
+    if (!artifact) {
+      return res.status(404).json({ error: 'Artifact not found' });
+    }
+
+    const pdf = await renderArtifactPdf(artifact);
+    const filename = safePdfFilename(artifact.title);
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Length', String(pdf.length));
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.status(200).send(pdf);
+  } catch (error) {
+    logger.error('[projects] Error exporting project artifact PDF', error);
+    res.status(400).json({ error: error.message || 'Error exporting artifact PDF' });
+  }
+});
+
+router.post('/:projectId/artifacts', async (req, res) => {
+  try {
+    const { contentText, type } = req.body;
+    const supportedTypes = new Set([
+      'text/html',
+      'application/vnd.code-html',
+      'document',
+      'text/markdown',
+      'text/md',
+      'text/plain',
+    ]);
+    if (!supportedTypes.has(type)) {
+      return res.status(400).json({ error: 'Unsupported artifact type in this version' });
+    }
+    if (typeof contentText !== 'string' || contentText.length === 0) {
+      return res.status(400).json({ error: 'Artifact content is required' });
+    }
+
+    const artifact = await db.saveProjectArtifact(getUserId(req), {
+      ...req.body,
+      projectId: req.params.projectId,
+    });
+    res.status(201).json(artifact);
+  } catch (error) {
+    logger.error('[projects] Error saving project artifact', error);
+    res.status(400).json({ error: error.message || 'Error saving project artifact' });
   }
 });
 

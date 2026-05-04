@@ -18,7 +18,12 @@ export default function useArtifactProps({ artifact }: { artifact: Artifact }) {
       return ['diagram.mmd', getMermaidFiles(artifact.content ?? '', isDarkMode)];
     }
 
-    if (type === 'text/markdown' || type === 'text/md' || type === 'text/plain') {
+    if (
+      type === 'document' ||
+      type === 'text/markdown' ||
+      type === 'text/md' ||
+      type === 'text/plain'
+    ) {
       return ['content.md', getMarkdownFiles(artifact.content ?? '')];
     }
 

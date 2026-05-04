@@ -1,10 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { dataService, QueryKeys } from 'librechat-data-provider';
+import { dataService, QueryKeys, request } from 'librechat-data-provider';
 import type {
   CreateProjectFromConversationRequest,
   CreateProjectMemoryRequest,
   CreateProjectRequest,
   LinkProjectConversationRequest,
+  SaveProjectArtifactRequest,
   UpdateProjectRequest,
 } from 'librechat-data-provider';
 
@@ -38,6 +39,18 @@ export const useProjectMemoriesQuery = (projectId?: string) =>
   useQuery(
     [QueryKeys.projectMemories, projectId],
     () => dataService.listProjectMemories(projectId ?? ''),
+    {
+      enabled: !!projectId,
+      staleTime: 0,
+      refetchOnMount: 'always',
+      refetchOnWindowFocus: false,
+    },
+  );
+
+export const useProjectArtifactsQuery = (projectId?: string) =>
+  useQuery(
+    [QueryKeys.projectArtifacts, projectId],
+    () => dataService.listProjectArtifacts(projectId ?? ''),
     {
       enabled: !!projectId,
       staleTime: 0,
@@ -103,3 +116,26 @@ export const useCreateProjectMemoryMutation = (projectId: string) => {
     },
   );
 };
+
+export const useSaveProjectArtifactMutation = (projectId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation(
+    (payload: SaveProjectArtifactRequest) => dataService.saveProjectArtifact(projectId, payload),
+    {
+      onSuccess: () => queryClient.invalidateQueries([QueryKeys.projectArtifacts, projectId]),
+    },
+  );
+};
+
+export const useProjectArtifactMutation = (projectId: string) =>
+  useMutation((artifactId: string) => dataService.getProjectArtifact(projectId, artifactId));
+
+export const useExportProjectArtifactPdfMutation = (projectId: string) =>
+  useMutation((artifactId: string) =>
+    request.getResponse(
+      `/api/projects/${projectId}/artifacts/${encodeURIComponent(artifactId)}/export/pdf`,
+      {
+        responseType: 'blob',
+      },
+    ),
+  );

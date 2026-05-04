@@ -59,6 +59,19 @@ export type TProjectMemory = {
   updatedAt?: string;
 };
 
+export type TProjectArtifact = {
+  artifactId: string;
+  projectId: string;
+  type: string;
+  title: string;
+  contentJson?: Record<string, unknown>;
+  contentText?: string;
+  status: 'draft' | 'final' | 'archived';
+  createdBy: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
 export type ProjectListResponse = {
   projects: TProject[];
 };
@@ -73,6 +86,10 @@ export type ProjectFilesResponse = {
 
 export type ProjectMemoriesResponse = {
   memories: TProjectMemory[];
+};
+
+export type ProjectArtifactsResponse = {
+  artifacts: TProjectArtifact[];
 };
 
 export type CreateProjectRequest = {
@@ -102,4 +119,13 @@ export type CreateProjectMemoryRequest = {
   sourceType?: TProjectMemory['sourceType'];
   sourceId?: string;
   importance?: number;
+};
+
+export type SaveProjectArtifactRequest = {
+  artifactId?: string;
+  type: string;
+  title: string;
+  contentJson?: Record<string, unknown>;
+  contentText?: string;
+  status?: TProjectArtifact['status'];
 };

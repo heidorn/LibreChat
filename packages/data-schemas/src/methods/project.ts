@@ -3,6 +3,7 @@ import type { Model } from 'mongoose';
 import type {
   IConversation,
   IProject,
+  IProjectArtifact,
   IProjectConversation,
   IProjectFile,
   IProjectMemory,
@@ -49,6 +50,16 @@ type ProjectMemoryInput = {
   importance?: number;
 };
 
+type ProjectArtifactInput = {
+  projectId: string;
+  artifactId?: string;
+  type: string;
+  title: string;
+  contentJson?: Record<string, unknown>;
+  contentText?: string;
+  status?: 'draft' | 'final' | 'archived';
+};
+
 const normalizeProjectName = (name: string) => name.trim().slice(0, 120);
 
 export function createProjectMethods(mongoose: typeof import('mongoose')) {
@@ -57,6 +68,8 @@ export function createProjectMethods(mongoose: typeof import('mongoose')) {
     mongoose.models.ProjectConversation as Model<IProjectConversation>;
   const getProjectFileModel = () => mongoose.models.ProjectFile as Model<IProjectFile>;
   const getProjectMemoryModel = () => mongoose.models.ProjectMemory as Model<IProjectMemory>;
+  const getProjectArtifactModel = () =>
+    mongoose.models.ProjectArtifact as Model<IProjectArtifact>;
 
   async function createProject(userId: string, input: ProjectInput) {
     const Project = getProjectModel();
@@ -227,6 +240,50 @@ export function createProjectMethods(mongoose: typeof import('mongoose')) {
     return await ProjectFile.find({ projectId }).sort({ createdAt: -1 }).lean();
   }
 
+  async function saveProjectArtifact(userId: string, input: ProjectArtifactInput) {
+    const project = await getProject(userId, input.projectId);
+    if (!project) {
+      throw new Error('Project not found');
+    }
+
+    const ProjectArtifact = getProjectArtifactModel();
+    const artifactId = input.artifactId || `artifact_${randomUUID()}`;
+    return await ProjectArtifact.findOneAndUpdate(
+      { projectId: input.projectId, artifactId },
+      {
+        artifactId,
+        projectId: input.projectId,
+        type: input.type,
+        title: input.title.trim().slice(0, 160) || 'Untitled artifact',
+        contentJson: input.contentJson,
+        contentText: input.contentText,
+        status: input.status ?? 'draft',
+        createdBy: userId,
+      },
+      { new: true, upsert: true },
+    ).lean();
+  }
+
+  async function getProjectArtifacts(userId: string, projectId: string) {
+    const project = await getProject(userId, projectId);
+    if (!project) {
+      return [];
+    }
+
+    const ProjectArtifact = getProjectArtifactModel();
+    return await ProjectArtifact.find({ projectId }).sort({ updatedAt: -1 }).lean();
+  }
+
+  async function getProjectArtifact(userId: string, projectId: string, artifactId: string) {
+    const project = await getProject(userId, projectId);
+    if (!project) {
+      return null;
+    }
+
+    const ProjectArtifact = getProjectArtifactModel();
+    return await ProjectArtifact.findOne({ projectId, artifactId }).lean();
+  }
+
   async function addProjectMemory(userId: string, input: ProjectMemoryInput) {
     const project = await getProject(userId, input.projectId);
     if (!project) {
@@ -281,6 +338,9 @@ export function createProjectMethods(mongoose: typeof import('mongoose')) {
     createProjectFromConversation,
     addProjectFile,
     getProjectFiles,
+    saveProjectArtifact,
+    getProjectArtifacts,
+    getProjectArtifact,
     addProjectMemory,
     getProjectMemories,
     deleteProjectMemory,

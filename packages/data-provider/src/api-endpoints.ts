@@ -389,8 +389,7 @@ export const addTagToConversation = (conversationId: string) =>
 
 /* Projects */
 export const projects = () => `${BASE_URL}/api/projects`;
-export const projectById = (projectId: string) =>
-  `${projects()}/${encodeURIComponent(projectId)}`;
+export const projectById = (projectId: string) => `${projects()}/${encodeURIComponent(projectId)}`;
 export const projectConversations = (projectId: string) =>
   `${projectById(projectId)}/conversations`;
 export const linkProjectConversation = (projectId: string) =>
@@ -399,6 +398,11 @@ export const projectConversation = (projectId: string, conversationId: string) =
   `${projectConversations(projectId)}/${encodeURIComponent(conversationId)}`;
 export const projectFromConversation = () => `${projects()}/from-conversation`;
 export const projectFiles = (projectId: string) => `${projectById(projectId)}/files`;
+export const projectArtifacts = (projectId: string) => `${projectById(projectId)}/artifacts`;
+export const projectArtifact = (projectId: string, artifactId: string) =>
+  `${projectArtifacts(projectId)}/${encodeURIComponent(artifactId)}`;
+export const projectArtifactPdf = (projectId: string, artifactId: string) =>
+  `${projectArtifact(projectId, artifactId)}/export/pdf`;
 export const projectMemories = (projectId: string) => `${projectById(projectId)}/memories`;
 export const projectMemory = (projectId: string, memoryId: string) =>
   `${projectMemories(projectId)}/${encodeURIComponent(memoryId)}`;

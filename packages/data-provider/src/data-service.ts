@@ -949,9 +949,7 @@ export function listProjects(): Promise<projects.ProjectListResponse> {
   return request.get(endpoints.projects());
 }
 
-export function createProject(
-  payload: projects.CreateProjectRequest,
-): Promise<projects.TProject> {
+export function createProject(payload: projects.CreateProjectRequest): Promise<projects.TProject> {
   return request.post(endpoints.projects(), payload);
 }
 
@@ -1012,6 +1010,35 @@ export function deleteProjectMemory(
   memoryId: string,
 ): Promise<projects.TProjectMemory | { ok: boolean }> {
   return request.delete(endpoints.projectMemory(projectId, memoryId));
+}
+
+export function listProjectArtifacts(
+  projectId: string,
+): Promise<projects.ProjectArtifactsResponse> {
+  return request.get(endpoints.projectArtifacts(projectId));
+}
+
+export function getProjectArtifact(
+  projectId: string,
+  artifactId: string,
+): Promise<projects.TProjectArtifact> {
+  return request.get(endpoints.projectArtifact(projectId, artifactId));
+}
+
+export function saveProjectArtifact(
+  projectId: string,
+  payload: projects.SaveProjectArtifactRequest,
+): Promise<projects.TProjectArtifact> {
+  return request.post(endpoints.projectArtifacts(projectId), payload);
+}
+
+export function exportProjectArtifactPdf(
+  projectId: string,
+  artifactId: string,
+): Promise<AxiosResponse<Blob>> {
+  return request.getResponse(endpoints.projectArtifactPdf(projectId, artifactId), {
+    responseType: 'blob',
+  });
 }
 export function rebuildConversationTags(): Promise<t.TConversationTagsResponse> {
   return request.post(endpoints.conversationTags('rebuild'));

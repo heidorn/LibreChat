@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useRecoilCallback, useRecoilValue } from 'recoil';
 import { Spinner, useToastContext } from '@librechat/client';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Constants, EModelEndpoint } from 'librechat-data-provider';
 import { useGetModelsQuery } from 'librechat-data-provider/react-query';
 import type { TPreset } from 'librechat-data-provider';
@@ -36,6 +36,8 @@ import store from '~/store';
 
 const PROJECT_CONTEXT_START = '[PROJECT CONTEXT START]';
 const PROJECT_CONTEXT_END = '[PROJECT CONTEXT END]';
+const LPH_MANUS_SPEC_NAME = 'lph-manus';
+const LPH_MANUS_MODEL_LABEL = 'LPH Manus';
 
 const stripProjectContext = (promptPrefix?: string | null) => {
   if (!promptPrefix) {
@@ -63,10 +65,17 @@ export default function ChatRoute() {
   useAppStartup({ startupConfig, user });
 
   const index = 0;
+  const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { conversationId = '' } = useParams();
   const projectIdParam = searchParams.get('projectId') ?? '';
   const projectChatNonce = searchParams.get('projectChat') ?? '';
+  const locationState = location.state as { projectId?: unknown; spec?: unknown } | null;
+  const projectIdState =
+    typeof locationState?.projectId === 'string' ? locationState.projectId : '';
+  const specState = typeof locationState?.spec === 'string' ? locationState.spec : '';
+  const pendingProjectId = conversationId === Constants.NEW_CONVO ? projectIdState : '';
   useIdChangeEffect(`${conversationId}:${projectIdParam}:${projectChatNonce}`);
   const { hasSetConversation, conversation } = store.useCreateConversationAtom(index);
   const { newConversation } = useNewConvo();
@@ -81,7 +90,11 @@ export default function ChatRoute() {
     enabled:
       isAuthenticated && conversationId !== Constants.NEW_CONVO && !hasSetConversation.current,
   });
-  const projectId = projectIdParam || initialConvoQuery.data?.projectId || conversation?.projectId;
+  const projectId =
+    projectIdParam ||
+    initialConvoQuery.data?.projectId ||
+    conversation?.projectId ||
+    pendingProjectId;
   const projectQuery = useProjectQuery(projectId);
   const projectMemoriesQuery = useProjectMemoriesQuery(projectId);
   const endpointsQuery = useGetEndpointsQuery({ enabled: isAuthenticated });
@@ -98,6 +111,32 @@ export default function ChatRoute() {
       setIsTemporary(false);
     }
   }, [conversationId, isTemporaryChat, setIsTemporary, defaultTemporaryChat]);
+
+  useEffect(() => {
+    const newConversationProjectId =
+      conversationId === Constants.NEW_CONVO ? pendingProjectId || conversation?.projectId : '';
+
+    if (newConversationProjectId && !projectIdParam) {
+      navigate(
+        `/c/${Constants.NEW_CONVO}?projectId=${encodeURIComponent(newConversationProjectId)}`,
+        {
+          replace: true,
+          state: {
+            focusChat: true,
+            projectId: newConversationProjectId,
+            spec: specState || LPH_MANUS_SPEC_NAME,
+          },
+        },
+      );
+    }
+  }, [
+    conversation?.projectId,
+    conversationId,
+    navigate,
+    pendingProjectId,
+    projectIdParam,
+    specState,
+  ]);
 
   /** This effect is mainly for the first conversation state change on first load of the page.
    *  Adjusting this may have unintended consequences on the conversation state.
@@ -131,20 +170,34 @@ export default function ChatRoute() {
             .join('\n\n')
         : '';
       const cleanBasePromptPrefix = stripProjectContext(basePromptPrefix);
-      return projectPrompt
-        ? {
-            promptPrefix: [cleanBasePromptPrefix, projectPrompt].filter(Boolean).join('\n\n'),
-            projectId,
-          }
-        : projectId
-          ? { projectId }
-          : {};
+      if (projectPrompt) {
+        return {
+          promptPrefix: [cleanBasePromptPrefix, projectPrompt].filter(Boolean).join('\n\n'),
+          projectId,
+        };
+      }
+      return projectId ? { projectId } : {};
     };
 
     const getNewConvoPreset = () => {
       const result = getDefaultModelSpec(startupConfig);
-      const spec = result?.default ?? result?.last;
-      const specPreset = spec ? getModelSpecPreset(spec) : undefined;
+      const lphManusSpec = startupConfig?.modelSpecs?.list?.find(
+        (modelSpec) => modelSpec.name === (specState || LPH_MANUS_SPEC_NAME),
+      );
+      const spec = projectId
+        ? (lphManusSpec ?? result?.default ?? result?.last)
+        : (result?.default ?? result?.last);
+      let specPreset: Partial<TPreset> | undefined;
+      if (projectId && !lphManusSpec) {
+        specPreset = {
+          spec: LPH_MANUS_SPEC_NAME,
+          endpoint: EModelEndpoint.openAI,
+          model: 'gpt-4o-mini',
+          modelLabel: LPH_MANUS_MODEL_LABEL,
+        };
+      } else {
+        specPreset = spec ? getModelSpecPreset(spec) : undefined;
+      }
 
       const queryParams: Record<string, string> = {};
       searchParams.forEach((value, key) => {
@@ -168,6 +221,13 @@ export default function ChatRoute() {
     };
 
     const projectReady = !projectId || (projectQuery.data && projectMemoriesQuery.data);
+    const projectNewConvoTemplate = projectId
+      ? {
+          projectId,
+          spec: LPH_MANUS_SPEC_NAME,
+          modelLabel: LPH_MANUS_MODEL_LABEL,
+        }
+      : undefined;
 
     if (isNewConvo && endpointsQuery.data && modelsQuery.data && projectReady) {
       const preset = getNewConvoPreset();
@@ -175,7 +235,7 @@ export default function ChatRoute() {
       logger.log('conversation', 'ChatRoute, new convo effect', conversation);
       newConversation({
         modelsData: modelsQuery.data,
-        template: projectId ? { projectId } : undefined,
+        template: projectNewConvoTemplate,
         ...(preset ? { preset } : {}),
       });
 
@@ -228,7 +288,7 @@ export default function ChatRoute() {
       logger.log('conversation', 'ChatRoute new convo, assistants effect', conversation);
       newConversation({
         modelsData: modelsQuery.data,
-        template: projectId ? { projectId } : undefined,
+        template: projectNewConvoTemplate,
         ...(preset ? { preset } : {}),
       });
       hasSetConversation.current = true;
