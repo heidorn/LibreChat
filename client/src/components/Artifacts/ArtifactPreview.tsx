@@ -1,5 +1,6 @@
 import React, { memo, useMemo, type MutableRefObject } from 'react';
 import { SandpackPreview, SandpackProvider } from '@codesandbox/sandpack-react/unstyled';
+import { Sparkles } from 'lucide-react';
 import type {
   SandpackProviderProps,
   SandpackPreviewRef,
@@ -45,7 +46,17 @@ export const ArtifactPreview = memo(function ({
   );
 
   if (Object.keys(artifactFiles).length === 0) {
-    return null;
+    return (
+      <div className="lph-preview-fallback" role="status" aria-live="polite">
+        <div className="lph-preview-fallback-icon" aria-hidden="true">
+          <Sparkles size={20} />
+        </div>
+        <div className="lph-empty-state-title">Preview indisponível</div>
+        <div className="lph-empty-state-hint">
+          O conteúdo do artifact ainda está chegando ou não pode ser pré-visualizado neste formato.
+        </div>
+      </div>
+    );
   }
 
   return (

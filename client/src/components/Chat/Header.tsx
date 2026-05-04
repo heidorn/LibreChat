@@ -36,7 +36,7 @@ function Header() {
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
 
   return (
-    <div className="bg-[var(--lph-bg-app)]/95 absolute top-0 z-10 flex h-[58px] w-full items-center justify-between border-b border-[var(--lph-border-soft)] p-2 font-semibold text-[var(--lph-text)] backdrop-blur">
+    <div className="lph-chat-header bg-[var(--lph-bg-app)]/95 absolute top-0 z-10 flex h-[58px] w-full items-center justify-between border-b border-[var(--lph-border-soft)] p-2 font-semibold text-[var(--lph-text)] backdrop-blur">
       <div className="hide-scrollbar flex w-full items-center justify-between gap-2 overflow-x-auto">
         <div className="mx-1 flex items-center">
           <OpenSidebar className="md:hidden" />

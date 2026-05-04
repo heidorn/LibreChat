@@ -157,52 +157,46 @@ const ConversationsSection = memo(() => {
       role="region"
       aria-label={localize('com_ui_chat_history')}
     >
-      <div className="mb-6 flex items-center gap-3 px-1">
-        <img
-          src="assets/leads-per-hour/icon.png"
-          alt="Leads Per Hour"
-          className="h-8 w-8 rounded-lg"
-        />
-        <span className="lph-brand-font truncate text-lg font-semibold text-[#faf9f5]">
-          Leads Per Hour
-        </span>
+      <div className="lph-brand-row">
+        <img src="assets/leads-per-hour/icon.png" alt="Leads Per Hour" />
+        <span className="lph-brand-font truncate">Leads Per Hour</span>
       </div>
 
       <button
         type="button"
-        className="lph-nav-item mb-2 flex h-10 w-full items-center gap-3 px-2 text-sm font-semibold"
+        className="lph-nav-item mb-2 flex w-full items-center"
         onClick={() =>
           newConversation({
             template: activeProjectId ? { projectId: activeProjectId } : undefined,
           })
         }
       >
-        <SquarePen className="h-5 w-5" aria-hidden="true" />
-        Nova conversa
+        <SquarePen className="lph-sidebar-icon" aria-hidden="true" />
+        <span>Nova conversa</span>
       </button>
 
-      <div className="mb-6 flex min-h-10 items-center text-sm font-medium">
+      <div className="mb-4 flex min-h-9 items-center">
         {search.enabled ? (
           <div className="min-w-0 flex-1">
             <SearchBar isSmallScreen={isSmallScreen} />
           </div>
         ) : (
-          <div className="lph-nav-item flex h-10 w-full items-center gap-3 px-2">
-            <Search className="h-5 w-5 shrink-0" aria-hidden="true" />
+          <div className="lph-nav-item flex w-full items-center">
+            <Search className="lph-sidebar-icon" aria-hidden="true" />
             <span>Buscar em chats</span>
           </div>
         )}
       </div>
 
-      <div className="mb-5">
-        <div className="lph-section-label mb-2 px-2">Projetos</div>
-        <div className="space-y-1">
+      <div className="lph-section-block">
+        <div className="lph-section-label">Projetos</div>
+        <div className="space-y-0.5">
           <button
             type="button"
-            className="lph-nav-item flex h-9 w-full items-center gap-3 px-2 text-sm font-medium"
+            className="lph-nav-item lph-nav-item-compact flex w-full items-center"
             onClick={() => setIsProjectModalOpen(true)}
           >
-            <Plus className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <Plus className="lph-sidebar-icon" aria-hidden="true" />
             <span className="truncate">Novo Projeto</span>
           </button>
           {visibleProjects.map((project) => (
@@ -210,27 +204,27 @@ const ConversationsSection = memo(() => {
               key={project.projectId}
               type="button"
               className={cn(
-                'lph-nav-item flex h-9 w-full items-center gap-3 px-2 text-sm font-medium',
+                'lph-nav-item lph-nav-item-compact flex w-full items-center',
                 project.projectId === activeProjectId && 'lph-nav-item-active',
               )}
               onClick={() => openProject(project.projectId)}
             >
-              <Folder className="h-4 w-4 shrink-0" aria-hidden="true" />
+              <Folder className="lph-sidebar-icon" aria-hidden="true" />
               <span className="truncate">{project.name}</span>
             </button>
           ))}
           <button
             type="button"
-            className="lph-nav-item flex h-9 w-full items-center gap-3 px-2 text-sm font-medium"
+            className="lph-nav-item lph-nav-item-compact flex w-full items-center"
           >
-            <MoreHorizontal className="h-4 w-4 shrink-0" aria-hidden="true" />
+            <MoreHorizontal className="lph-sidebar-icon" aria-hidden="true" />
             <span>Mais</span>
           </button>
         </div>
       </div>
 
       <div className="lph-conversations-list flex min-h-0 flex-grow flex-col overflow-hidden">
-        <div className="lph-section-label mb-2 px-2">Recentes</div>
+        <div className="lph-section-label">Recentes</div>
         <Conversations
           conversations={conversations}
           moveToTop={moveToTop}

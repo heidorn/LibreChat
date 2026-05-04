@@ -72,7 +72,7 @@ const ArtifactButton = ({ artifact }: { artifact: Artifact | null }) => {
         };
 
         const buttonClass = cn(
-          'relative overflow-hidden rounded-xl transition-all duration-300 hover:border-border-medium hover:bg-surface-hover hover:shadow-lg active:scale-[0.98]',
+          'lph-artifact-card relative overflow-hidden rounded-xl transition-all duration-300 hover:border-border-medium hover:bg-surface-hover hover:shadow-lg active:scale-[0.98]',
           {
             'border-border-medium bg-surface-hover shadow-lg': isSelected,
             'border-border-light bg-surface-tertiary shadow-sm': !isSelected,
@@ -84,13 +84,18 @@ const ArtifactButton = ({ artifact }: { artifact: Artifact | null }) => {
           : localize('com_ui_artifact_click');
 
         return (
-          <button type="button" onClick={handleClick} className={buttonClass}>
-            <div className="w-fit p-2">
-              <div className="flex flex-row items-center gap-2">
+          <button
+            type="button"
+            onClick={handleClick}
+            className={buttonClass}
+            data-selected={isSelected ? 'true' : 'false'}
+          >
+            <div className="relative z-[1] w-fit p-2.5">
+              <div className="flex flex-row items-center gap-2.5">
                 <FilePreview fileType={fileType} className="relative" />
                 <div className="overflow-hidden text-left">
-                  <div className="truncate font-medium">{artifact.title}</div>
-                  <div className="truncate text-text-secondary">{actionLabel}</div>
+                  <div className="lph-artifact-card-title truncate">{artifact.title}</div>
+                  <div className="lph-artifact-card-meta truncate">{actionLabel}</div>
                 </div>
               </div>
             </div>

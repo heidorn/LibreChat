@@ -82,7 +82,7 @@ const HoverButton = memo(
     className = '',
   }: HoverButtonProps) => {
     const buttonStyle = cn(
-      'hover-button rounded-lg p-1.5 text-text-secondary-alt',
+      'hover-button lph-hover-button rounded-lg p-1.5 text-text-secondary-alt',
       'hover:text-text-primary hover:bg-surface-hover',
       'md:group-hover:visible md:group-focus-within:visible md:group-[.final-completion]:visible',
       !isLast && 'md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100',
@@ -185,7 +185,7 @@ const HoverButtons = ({
   const handleCopy = () => copyToClipboard(setIsCopied);
 
   return (
-    <div className="group visible flex justify-center gap-0.5 self-end focus-within:outline-none lg:justify-start">
+    <div className="lph-hover-row group visible flex justify-center gap-0.5 self-end focus-within:outline-none lg:justify-start">
       {/* Text to Speech */}
       {TextToSpeech && (
         <MessageAudio

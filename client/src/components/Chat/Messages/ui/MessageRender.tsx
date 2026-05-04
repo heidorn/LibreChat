@@ -190,7 +190,7 @@ const MessageRender = memo(function MessageRender({
         baseClasses.common,
         baseClasses.chat,
         conditionalClasses.focus,
-        'message-render',
+        'lph-message-row message-render',
       )}
     >
       {!hasParallelContent && (
@@ -216,7 +216,12 @@ const MessageRender = memo(function MessageRender({
         )}
 
         <div className="flex flex-col gap-1">
-          <div className="flex min-h-[20px] max-w-full flex-grow flex-col gap-0">
+          <div
+            className={cn(
+              'flex min-h-[20px] max-w-full flex-grow flex-col gap-0',
+              msg.isCreatedByUser ? 'lph-message-bubble-user' : 'lph-message-bubble-assistant',
+            )}
+          >
             <MessageContext.Provider value={messageContextValue}>
               <MessageContent
                 ask={ask}

@@ -3326,3 +3326,1896 @@ html {
   border-radius: 6px;
   padding: 0.1rem 0.3rem;
 }
+
+/* ===========================================================
+ * LPH Premium polish — additive layer
+ * Não substitui estilos do LibreChat. Sobrepõe via classes
+ * marcadas com .lph-* aplicadas pontualmente nos componentes.
+ * =========================================================== */
+
+/* --- Artifact Card (ArtifactButton) --- */
+.lph-artifact-card {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid var(--lph-border-soft);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0)) ,
+    var(--lph-bg-panel);
+  border-radius: var(--lph-radius-lg);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 1px 2px rgba(0, 0, 0, 0.18),
+    0 8px 24px rgba(0, 0, 0, 0.18);
+  transition:
+    transform 180ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 220ms ease,
+    border-color 220ms ease,
+    background 220ms ease;
+}
+
+.lph-artifact-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    135deg,
+    rgba(249, 115, 22, 0) 0%,
+    rgba(249, 115, 22, 0) 60%,
+    rgba(249, 115, 22, 0.06) 100%
+  );
+  opacity: 0;
+  transition: opacity 220ms ease;
+  z-index: 0;
+}
+
+.lph-artifact-card:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 2px 4px rgba(0, 0, 0, 0.22),
+    0 14px 36px rgba(0, 0, 0, 0.28);
+}
+
+.lph-artifact-card:hover::after {
+  opacity: 1;
+}
+
+.lph-artifact-card:active {
+  transform: translateY(0.5px);
+}
+
+.lph-artifact-card[data-selected='true'] {
+  border-color: rgba(249, 115, 22, 0.45);
+  box-shadow:
+    0 0 0 1px rgba(249, 115, 22, 0.25) inset,
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    0 14px 32px rgba(249, 115, 22, 0.08);
+}
+
+.lph-artifact-card-title {
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--lph-text);
+}
+
+.lph-artifact-card-meta {
+  font-size: 0.75rem;
+  color: var(--lph-text-faint);
+  letter-spacing: 0.005em;
+}
+
+/* --- Artifact Panel shell --- */
+.lph-artifact-panel-shell {
+  background: var(--lph-bg-app);
+  border-left: 1px solid var(--lph-border-soft);
+  box-shadow: -16px 0 48px rgba(0, 0, 0, 0.18);
+}
+
+.lph-artifact-panel-header {
+  background: var(--lph-bg-panel);
+  border-bottom: 1px solid var(--lph-border-soft);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.lph-artifact-panel-header-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--lph-text);
+}
+
+/* --- Action button cluster (icon-only buttons in panel header) --- */
+.lph-action-cluster {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--lph-border-soft);
+}
+
+.lph-action-icon {
+  position: relative;
+  border-radius: 8px;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.lph-action-icon:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--lph-text);
+}
+
+.lph-action-icon:active {
+  transform: scale(0.96);
+}
+
+.lph-action-icon[data-state='active'] {
+  background: rgba(249, 115, 22, 0.12);
+  color: var(--lph-orange-soft);
+}
+
+/* --- Tabs (Radio Code/Preview) refinement --- */
+.lph-tabs-pill {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--lph-border-soft);
+  border-radius: 10px;
+  padding: 2px;
+}
+
+/* --- Loading / empty / error states --- */
+@keyframes lph-shimmer {
+  0% {
+    background-position: -120% 0;
+  }
+  100% {
+    background-position: 220% 0;
+  }
+}
+
+.lph-skeleton {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.04) 0%,
+      rgba(255, 255, 255, 0.08) 40%,
+      rgba(255, 255, 255, 0.04) 100%
+    );
+  background-size: 220% 100%;
+  animation: lph-shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--lph-radius-md);
+}
+
+.lph-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px 24px;
+  text-align: center;
+  color: var(--lph-text-muted);
+}
+
+.lph-empty-state-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--lph-text);
+  letter-spacing: -0.005em;
+}
+
+.lph-empty-state-hint {
+  font-size: 0.8125rem;
+  color: var(--lph-text-faint);
+  max-width: 32ch;
+  line-height: 1.5;
+}
+
+.lph-error-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--lph-radius-md);
+  border: 1px solid rgba(239, 68, 68, 0.32);
+  background: rgba(239, 68, 68, 0.08);
+  color: #fecaca;
+  font-size: 0.8125rem;
+}
+
+.lph-error-banner-title {
+  font-weight: 600;
+  color: #fee2e2;
+}
+
+/* --- Future task/progress card (Bloco 4 hospedará aqui) --- */
+.lph-task-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--lph-border-soft);
+  background: var(--lph-bg-panel);
+  border-radius: var(--lph-radius-lg);
+  transition:
+    border-color 200ms ease,
+    box-shadow 220ms ease;
+}
+
+.lph-task-card[data-status='running'] {
+  border-color: rgba(249, 115, 22, 0.32);
+  box-shadow: 0 0 0 1px rgba(249, 115, 22, 0.1) inset;
+}
+
+.lph-task-card[data-status='done'] {
+  border-color: rgba(16, 185, 129, 0.28);
+}
+
+.lph-task-card[data-status='failed'] {
+  border-color: rgba(239, 68, 68, 0.32);
+  background: rgba(239, 68, 68, 0.04);
+}
+
+.lph-task-card-title {
+  font-weight: 600;
+  font-size: 0.875rem;
+  letter-spacing: -0.005em;
+  color: var(--lph-text);
+}
+
+.lph-task-card-meta {
+  font-size: 0.75rem;
+  color: var(--lph-text-faint);
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.lph-task-card-progress {
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.lph-task-card-progress > div {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--lph-orange) 0%,
+    var(--lph-orange-soft) 100%
+  );
+  transition: width 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* --- Subtle scrollbar refinement inside artifact panel --- */
+.lph-artifact-panel-shell *::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.lph-artifact-panel-shell *::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+}
+
+.lph-artifact-panel-shell *::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.lph-artifact-panel-shell *::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ===========================================================
+ * LPH Premium polish — Lote Visual 2
+ * Empty state + skeleton + error banner inside Artifact panel,
+ * plus chat message bubble polish.
+ * =========================================================== */
+
+/* --- Skeleton stack (loading) --- */
+.lph-skeleton-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 28px 24px;
+  width: 100%;
+}
+
+.lph-skeleton-stack > .lph-skeleton {
+  height: 14px;
+  border-radius: 6px;
+}
+
+.lph-skeleton-stack > .lph-skeleton:nth-child(1) { width: 88%; }
+.lph-skeleton-stack > .lph-skeleton:nth-child(2) { width: 72%; }
+.lph-skeleton-stack > .lph-skeleton:nth-child(3) { width: 94%; }
+.lph-skeleton-stack > .lph-skeleton:nth-child(4) { width: 64%; }
+.lph-skeleton-stack > .lph-skeleton:nth-child(5) { width: 80%; }
+
+.lph-skeleton-stack[data-variant='blocks'] > .lph-skeleton {
+  height: 64px;
+  border-radius: var(--lph-radius-md);
+}
+
+/* --- Preview fallback (wraps empty/error inside ArtifactPreview) --- */
+.lph-preview-fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 100%;
+  width: 100%;
+  padding: 32px;
+  background:
+    radial-gradient(
+      circle at 50% 30%,
+      rgba(249, 115, 22, 0.05) 0%,
+      transparent 60%
+    ),
+    var(--lph-bg-app);
+  color: var(--lph-text-muted);
+  text-align: center;
+}
+
+.lph-preview-fallback-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--lph-border-soft);
+  color: var(--lph-orange-soft);
+  margin-bottom: 4px;
+}
+
+/* --- Chat message rows: vertical rhythm and bubble polish --- */
+.lph-message-row {
+  position: relative;
+}
+
+.lph-message-bubble-user {
+  background: rgba(249, 115, 22, 0.08);
+  border: 1px solid rgba(249, 115, 22, 0.18);
+  border-radius: var(--lph-radius-lg);
+  padding: 12px 16px;
+  width: fit-content;
+  max-width: 100%;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 1px 2px rgba(0, 0, 0, 0.12);
+  color: var(--lph-text);
+  letter-spacing: -0.005em;
+  line-height: 1.55;
+}
+
+.lph-message-bubble-assistant {
+  background: transparent;
+  padding: 4px 2px 6px 2px;
+  color: var(--lph-text);
+  letter-spacing: -0.003em;
+  line-height: 1.65;
+}
+
+/* Avatar/role label tightening — only when adjacent to LPH bubbles */
+.lph-message-row .agent-turn h2,
+.lph-message-row .user-turn h2 {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--lph-text-faint);
+  margin-bottom: 4px;
+}
+
+/* Subtle separator between consecutive messages */
+.lph-message-row + .lph-message-row {
+  margin-top: 6px;
+}
+
+/* ===========================================================
+ * LPH Premium polish — Lote Visual 3
+ * Chat header, spec selector trigger, composer footer
+ * cluster, hover buttons polish.
+ * =========================================================== */
+
+/* --- Chat header / topbar --- */
+.lph-chat-header {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(31, 30, 29, 0.92) 0%,
+      rgba(31, 30, 29, 0.78) 100%
+    );
+  border-bottom: 1px solid var(--lph-border-soft);
+  backdrop-filter: blur(14px) saturate(120%);
+  -webkit-backdrop-filter: blur(14px) saturate(120%);
+}
+
+.lph-chat-header::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(249, 115, 22, 0.18) 50%,
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 320ms ease;
+  pointer-events: none;
+}
+
+.lph-chat-header:hover::after {
+  opacity: 1;
+}
+
+/* --- Spec selector trigger (model picker pill) --- */
+.lph-spec-trigger {
+  position: relative;
+  border-radius: 999px;
+  border: 1px solid var(--lph-border-soft);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0)),
+    var(--lph-bg-panel);
+  color: var(--lph-text);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  padding-inline: 14px;
+  height: 36px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 1px 2px rgba(0, 0, 0, 0.18);
+  transition:
+    background 200ms ease,
+    border-color 200ms ease,
+    box-shadow 220ms ease,
+    transform 160ms ease;
+}
+
+.lph-spec-trigger:hover {
+  border-color: rgba(249, 115, 22, 0.32);
+  background:
+    linear-gradient(180deg, rgba(249, 115, 22, 0.08), rgba(249, 115, 22, 0.02)),
+    var(--lph-bg-panel-hover);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 2px 8px rgba(249, 115, 22, 0.12);
+}
+
+.lph-spec-trigger:active {
+  transform: translateY(0.5px);
+}
+
+.lph-spec-trigger[aria-expanded='true'],
+.lph-spec-trigger[data-state='open'] {
+  border-color: rgba(249, 115, 22, 0.45);
+  box-shadow:
+    0 0 0 3px var(--lph-orange-glow),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+}
+
+.lph-spec-trigger > span {
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+/* --- Composer actions row (footer) --- */
+.lph-composer-actions-row {
+  position: relative;
+}
+
+.lph-composer-actions-row::before {
+  content: '';
+  position: absolute;
+  inset-inline: 12px;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--lph-border-soft) 22%,
+    var(--lph-border-soft) 78%,
+    transparent 100%
+  );
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* --- Hover buttons (under each message: copy/regen/edit/etc) --- */
+.lph-hover-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 12px;
+  transition:
+    opacity 220ms ease,
+    transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.lph-message-row:not(:hover):not(:focus-within) .lph-hover-row {
+  opacity: 0.55;
+}
+
+.lph-message-row:hover .lph-hover-row,
+.lph-message-row:focus-within .lph-hover-row {
+  opacity: 1;
+}
+
+.lph-hover-button {
+  position: relative;
+  border-radius: 8px !important;
+  padding: 6px !important;
+  color: var(--lph-text-faint);
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.lph-hover-button:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: var(--lph-text) !important;
+}
+
+.lph-hover-button:active {
+  transform: scale(0.94);
+}
+
+.lph-hover-button.active {
+  background: rgba(249, 115, 22, 0.12) !important;
+  color: var(--lph-orange-soft) !important;
+}
+
+/* ===========================================================
+ * LPH Premium polish — Lote Visual 4A (Composer)
+ * Composer shell, textarea typography, send/stop premium,
+ * attach trigger, badge row pílulas. Aditivo, sem lógica.
+ * =========================================================== */
+
+/* --- Composer shell (outer container já tem border/glow LPH inline;
+       aqui apenas refinamos sombra interna e radius consistente) --- */
+.lph-composer-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.lph-composer-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.025) 0%,
+    rgba(255, 255, 255, 0) 28%
+  );
+  z-index: 0;
+}
+
+.lph-composer-shell > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Textarea typography refinement --- */
+.lph-composer-textarea {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  letter-spacing: -0.003em;
+  color: var(--lph-text);
+}
+
+.lph-composer-textarea::placeholder {
+  color: var(--lph-text-faint) !important;
+  opacity: 0.85;
+  font-weight: 400;
+  letter-spacing: 0.005em;
+}
+
+/* --- Send button premium --- */
+.lph-send-button {
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f5f2ea 100%) !important;
+  color: #1f1e1d !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 2px 6px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(249, 115, 22, 0) ;
+  transition:
+    box-shadow 200ms ease,
+    transform 160ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    background 200ms ease !important;
+}
+
+.lph-send-button:not(:disabled):hover {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 4px 12px rgba(249, 115, 22, 0.32),
+    0 0 0 3px var(--lph-orange-glow);
+  transform: translateY(-0.5px);
+}
+
+.lph-send-button:not(:disabled):active {
+  transform: translateY(0.5px);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.24) inset,
+    0 0 0 2px var(--lph-orange-glow);
+}
+
+.lph-send-button:disabled {
+  background: var(--lph-bg-panel) !important;
+  color: var(--lph-text-faint) !important;
+  box-shadow: none !important;
+  opacity: 0.45 !important;
+}
+
+/* --- Stop button premium --- */
+.lph-stop-button {
+  background: var(--lph-bg-panel) !important;
+  color: var(--lph-text) !important;
+  border: 1px solid rgba(249, 115, 22, 0.32) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 2px 6px rgba(249, 115, 22, 0.16),
+    0 0 0 3px rgba(249, 115, 22, 0.08);
+  transition:
+    box-shadow 200ms ease,
+    border-color 200ms ease,
+    transform 160ms ease !important;
+}
+
+.lph-stop-button:hover {
+  border-color: rgba(249, 115, 22, 0.55) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 4px 12px rgba(249, 115, 22, 0.28),
+    0 0 0 4px rgba(249, 115, 22, 0.12) !important;
+}
+
+.lph-stop-button:active {
+  transform: scale(0.96);
+}
+
+.lph-stop-button svg {
+  color: var(--lph-orange-soft) !important;
+}
+
+/* --- Attach file trigger --- */
+.lph-attach-trigger {
+  position: relative;
+  border-radius: 999px !important;
+  transition:
+    background-color 180ms ease,
+    box-shadow 220ms ease,
+    transform 160ms ease !important;
+}
+
+.lph-attach-trigger:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+  box-shadow: 0 0 0 1px var(--lph-border-soft);
+}
+
+.lph-attach-trigger:not(:disabled):active {
+  transform: scale(0.94);
+}
+
+.lph-attach-trigger:disabled {
+  opacity: 0.45 !important;
+}
+
+/* --- Badge row polish (LPH pílula) --- */
+.lph-badge-row {
+  position: relative;
+}
+
+.lph-badge-row .badge-icon button {
+  border-radius: 999px !important;
+  border-color: var(--lph-border-soft) !important;
+  background: var(--lph-bg-panel) !important;
+  color: var(--lph-text-muted) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 1px 2px rgba(0, 0, 0, 0.14) !important;
+  transition:
+    background 200ms ease,
+    border-color 200ms ease,
+    color 200ms ease,
+    box-shadow 220ms ease !important;
+}
+
+.lph-badge-row .badge-icon button:hover {
+  background: var(--lph-bg-panel-hover) !important;
+  border-color: rgba(249, 115, 22, 0.32) !important;
+  color: var(--lph-text) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 2px 6px rgba(249, 115, 22, 0.12) !important;
+}
+
+/* Estado ativo: bg-surface-active vem do upstream Badge; reforçamos com accent */
+.lph-badge-row .badge-icon button[class*='bg-surface-active'],
+.lph-badge-row .badge-icon button[data-active='true'] {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(249, 115, 22, 0.16) 0%,
+      rgba(249, 115, 22, 0.08) 100%
+    ) !important;
+  border-color: rgba(249, 115, 22, 0.45) !important;
+  color: var(--lph-orange-soft) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 0 0 3px var(--lph-orange-glow) !important;
+}
+
+/* ===========================================================
+ * LPH Premium polish — Lote Visual 4B
+ * Thinking indicator (PlaceholderRow), inline loading pulse,
+ * progress stripe utility. Sem lógica, apenas CSS.
+ * =========================================================== */
+
+/* --- Thinking indicator (3 dots) — usado no PlaceholderRow --- */
+@keyframes lph-thinking-pulse {
+  0%,
+  80%,
+  100% {
+    opacity: 0.32;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+.lph-thinking-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding-inline: 2px;
+  pointer-events: none;
+}
+
+.lph-thinking-indicator > span {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--lph-orange-soft);
+  box-shadow: 0 0 6px rgba(249, 115, 22, 0.32);
+  animation: lph-thinking-pulse 1.2s ease-in-out infinite;
+  animation-delay: 0ms;
+}
+
+.lph-thinking-indicator > span:nth-child(2) {
+  animation-delay: 160ms;
+}
+
+.lph-thinking-indicator > span:nth-child(3) {
+  animation-delay: 320ms;
+}
+
+/* Reduz movimento se o usuário pediu */
+@media (prefers-reduced-motion: reduce) {
+  .lph-thinking-indicator > span {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
+/* --- Inline loading pulse utilitário (para uso futuro em outros lugares) --- */
+@keyframes lph-loading-pulse-anim {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.lph-loading-pulse {
+  animation: lph-loading-pulse-anim 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lph-loading-pulse {
+    animation: none;
+    opacity: 0.7;
+  }
+}
+
+/* --- Progress stripe (barra fina horizontal animada) — utilitário pronto --- */
+@keyframes lph-progress-stripe-shift {
+  0% {
+    transform: translateX(-30%);
+  }
+  100% {
+    transform: translateX(130%);
+  }
+}
+
+.lph-progress-stripe {
+  position: relative;
+  height: 2px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.lph-progress-stripe::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 35%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--lph-orange-soft) 30%,
+    var(--lph-orange) 50%,
+    var(--lph-orange-soft) 70%,
+    transparent 100%
+  );
+  animation: lph-progress-stripe-shift 1.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lph-progress-stripe::after {
+    animation: none;
+    width: 100%;
+    opacity: 0.5;
+  }
+}
+
+/* ===========================================================
+ * LPH Premium polish — Lote Visual 5
+ * Sidebar density, icon tokens, item ativo refinado, list de
+ * conversas compacta, brand row, dropdown de upload.
+ * Tudo aditivo (override por especificidade ou classes novas).
+ * =========================================================== */
+
+/* --- Sidebar shell density --- */
+.lph-sidebar-shell {
+  background: var(--lph-bg-sidebar);
+  color: var(--lph-text);
+  border-right: 1px solid var(--lph-border-soft);
+  padding-block: 14px 12px;
+  padding-inline: 10px;
+}
+
+/* --- Brand row (logo + name) --- */
+.lph-brand-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-inline: 6px;
+  margin-bottom: 18px;
+  user-select: none;
+}
+
+.lph-brand-row img {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.lph-brand-row .lph-brand-font {
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--lph-text);
+  line-height: 1.2;
+}
+
+/* --- Nav item density refinement --- */
+.lph-nav-item {
+  color: var(--lph-text-muted);
+  border-radius: var(--lph-radius-md);
+  height: 34px;
+  padding-inline: 10px;
+  gap: 10px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: -0.003em;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 200ms ease;
+}
+
+/* Compact variant (for inner section items like Projects) */
+.lph-nav-item-compact {
+  height: 30px;
+  font-size: 0.78125rem;
+}
+
+.lph-nav-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--lph-text);
+}
+
+.lph-nav-item-active {
+  position: relative;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(249, 115, 22, 0.06) 0%,
+      rgba(249, 115, 22, 0.02) 100%
+    ),
+    rgba(255, 255, 255, 0.03);
+  color: var(--lph-text);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset;
+}
+
+.lph-nav-item-active::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 0 999px 999px 0;
+  background: var(--lph-orange);
+}
+
+/* --- Sidebar icon token --- */
+.lph-sidebar-icon {
+  width: 16px !important;
+  height: 16px !important;
+  stroke-width: 1.75;
+  flex-shrink: 0;
+  color: var(--lph-text-faint);
+  opacity: 0.85;
+  transition:
+    color 160ms ease,
+    opacity 160ms ease;
+}
+
+.lph-nav-item:hover .lph-sidebar-icon,
+.lph-nav-item-active .lph-sidebar-icon {
+  color: var(--lph-text);
+  opacity: 1;
+}
+
+.lph-nav-item-active .lph-sidebar-icon {
+  color: var(--lph-orange-soft);
+}
+
+/* --- Section label (Projetos / Recentes) --- */
+.lph-section-label {
+  color: var(--lph-text-faint);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding-inline: 10px;
+  margin-bottom: 6px;
+  opacity: 0.78;
+}
+
+/* --- Section block container — tighten gaps --- */
+.lph-section-block {
+  margin-bottom: 18px;
+}
+
+.lph-section-block + .lph-section-block {
+  margin-top: 0;
+}
+
+/* --- Convo item compactness + lateral accent --- */
+.lph-convo-item {
+  color: var(--lph-text-muted);
+  background: transparent;
+  border-radius: var(--lph-radius-md);
+  transition:
+    background-color 140ms ease,
+    color 140ms ease,
+    box-shadow 200ms ease;
+}
+
+.lph-convo-item:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--lph-text);
+}
+
+.lph-convo-item-active {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(249, 115, 22, 0.07) 0%,
+      rgba(249, 115, 22, 0.02) 100%
+    ),
+    rgba(255, 255, 255, 0.03) !important;
+  color: var(--lph-text) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset;
+}
+
+.lph-convo-item-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  border-radius: 0 999px 999px 0;
+  background: var(--lph-orange);
+  z-index: 1;
+}
+
+/* --- Recent conversations: dim model icons (NOT the spinner) --- */
+.lph-convo-item .shadow-stroke,
+.lph-convo-item div[class*='rounded-full'][class*='bg-white'] {
+  opacity: 0.32;
+  transform: scale(0.7);
+  transition:
+    opacity 200ms ease,
+    transform 200ms ease;
+}
+
+.lph-convo-item:hover .shadow-stroke,
+.lph-convo-item:hover div[class*='rounded-full'][class*='bg-white'],
+.lph-convo-item-active .shadow-stroke,
+.lph-convo-item-active div[class*='rounded-full'][class*='bg-white'] {
+  opacity: 0.55;
+}
+
+/* keep the generating spinner fully visible */
+.lph-convo-item svg.animate-spin {
+  opacity: 1 !important;
+  transform: none !important;
+  color: var(--lph-orange-soft) !important;
+}
+
+/* --- Conversation date pill --- */
+.lph-conversation-date {
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--lph-text-faint);
+  opacity: 0.7;
+}
+
+/* --- Upload dropdown polish (Ariakit menu surface) --- */
+[id='attach-file-menu'] {
+  background: var(--lph-bg-panel) !important;
+  border: 1px solid var(--lph-border-soft) !important;
+  border-radius: var(--lph-radius-lg) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 16px 40px rgba(0, 0, 0, 0.35) !important;
+  padding: 6px !important;
+  min-width: 240px;
+}
+
+[id='attach-file-menu'] [role='menuitem'] {
+  border-radius: var(--lph-radius-md);
+  padding-inline: 10px;
+  height: 36px;
+  font-size: 0.8125rem;
+  color: var(--lph-text-muted);
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+[id='attach-file-menu'] [role='menuitem']:hover,
+[id='attach-file-menu'] [role='menuitem'][data-active-item] {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--lph-text) !important;
+}
+
+[id='attach-file-menu'] [role='menuitem'] svg {
+  width: 16px;
+  height: 16px;
+  opacity: 0.78;
+}
+
+/* ===========================================================
+ * LPH Premium polish — Lote 5.1 (sidebar refine pass)
+ * Corrige Search icon, tightens edges, hide model icons em
+ * conversas, micro-effects no hover/active.
+ * =========================================================== */
+
+/* --- Tighten shell + brand --- */
+.lph-sidebar-shell {
+  padding-block: 10px 10px;
+  padding-inline: 6px;
+}
+
+.lph-brand-row {
+  padding-inline: 8px;
+  padding-block: 6px;
+  margin-bottom: 14px;
+  position: relative;
+}
+
+.lph-brand-row::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: -6px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--lph-border-soft) 30%,
+    var(--lph-border-soft) 70%,
+    transparent 100%
+  );
+  opacity: 0.7;
+}
+
+/* --- Nav item edge tightening --- */
+.lph-nav-item {
+  padding-inline: 8px;
+  gap: 10px;
+}
+
+/* --- SearchBar: forçar paridade visual com lph-nav-item --- */
+.lph-sidebar-search {
+  height: 34px !important;
+  padding-inline: 8px !important;
+  padding-block: 0 !important;
+  gap: 10px !important;
+  border-radius: var(--lph-radius-md) !important;
+  border: none !important;
+  background: transparent !important;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease;
+}
+
+.lph-sidebar-search:hover,
+.lph-sidebar-search:focus-within {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+/* substitui o ícone absolute do SearchBar por algo posicionado consistente */
+.lph-sidebar-search > svg {
+  position: static !important;
+  width: 16px !important;
+  height: 16px !important;
+  stroke-width: 1.75;
+  color: var(--lph-text-faint) !important;
+  opacity: 0.85;
+  flex-shrink: 0;
+  transition:
+    color 160ms ease,
+    opacity 160ms ease;
+}
+
+.lph-sidebar-search:hover > svg,
+.lph-sidebar-search:focus-within > svg {
+  color: var(--lph-text) !important;
+  opacity: 1;
+}
+
+.lph-sidebar-search input {
+  padding-left: 0 !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.003em;
+}
+
+.lph-sidebar-search input::placeholder {
+  color: var(--lph-text-muted) !important;
+  font-weight: 500 !important;
+}
+
+/* --- Section labels: bullet sutil + tighter padding --- */
+.lph-section-label {
+  position: relative;
+  padding-inline: 8px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 4px;
+  margin-top: 14px;
+}
+
+.lph-section-label::before {
+  content: '';
+  width: 3px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--lph-orange-soft);
+  opacity: 0.55;
+  flex-shrink: 0;
+}
+
+.lph-section-block {
+  margin-bottom: 6px;
+}
+
+/* --- Nav item micro slide-in accent (hover) --- */
+.lph-nav-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.lph-nav-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  border-radius: 0 999px 999px 0;
+  background: var(--lph-orange);
+  transform: translateX(-3px);
+  opacity: 0;
+  transition:
+    transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 200ms ease;
+}
+
+.lph-nav-item:hover::before {
+  transform: translateX(0);
+  opacity: 0.45;
+}
+
+.lph-nav-item-active {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(249, 115, 22, 0.08) 0%,
+      rgba(249, 115, 22, 0.02) 60%,
+      transparent 100%
+    ) !important;
+}
+
+.lph-nav-item-active::before {
+  left: 0 !important;
+  transform: translateX(0);
+  opacity: 1;
+  width: 3px;
+}
+
+/* --- Recent conversations: HIDE model icons (was dimmed) --- */
+.lph-convo-item .shadow-stroke,
+.lph-convo-item div[class*='rounded-full'][class*='bg-white'] {
+  display: none !important;
+}
+
+/* keep generating spinner */
+.lph-convo-item svg.animate-spin {
+  display: block !important;
+  opacity: 1 !important;
+  transform: none !important;
+  color: var(--lph-orange-soft) !important;
+}
+
+/* --- Convo item edge consistency (sem ícone agora, ajustar padding-left) --- */
+.lph-convo-item .group {
+  padding-inline-start: 10px !important;
+}
+
+/* --- Convo item: animation pulse quando gerando --- */
+@keyframes lph-convo-generating-pulse {
+  0%,
+  100% {
+    box-shadow:
+      inset 2px 0 0 var(--lph-orange);
+  }
+  50% {
+    box-shadow:
+      inset 3px 0 0 var(--lph-orange),
+      0 0 0 1px rgba(249, 115, 22, 0.18);
+  }
+}
+
+.lph-convo-item:has(svg.animate-spin) {
+  animation: lph-convo-generating-pulse 1.6s ease-in-out infinite;
+  border-radius: var(--lph-radius-md);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lph-convo-item:has(svg.animate-spin) {
+    animation: none;
+    box-shadow: inset 2px 0 0 var(--lph-orange);
+  }
+  .lph-nav-item::before {
+    transition: none;
+  }
+}
+
+/* --- Conversation date header refine --- */
+.lph-conversation-date {
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--lph-text-faint);
+  opacity: 0.65;
+  padding-inline: 10px;
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+
+/* ===========================================================
+ * LPH Premium polish — Lote 5.2 (refinements)
+ * Account footer, kebab "..." button, date headers separator,
+ * convo hover micro-shift, sidebar separator.
+ * =========================================================== */
+
+/* --- Sidebar footer divider refinement --- */
+.lph-sidebar-shell > div.mt-3 {
+  margin-top: 10px !important;
+  padding-top: 10px !important;
+  border-top: 1px solid transparent !important;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--lph-border-soft) 30%,
+    var(--lph-border-soft) 70%,
+    transparent 100%
+  );
+  background-position: top center;
+  background-size: 100% 1px;
+  background-repeat: no-repeat;
+}
+
+/* --- Account settings button (Ricardo Heidorn footer) --- */
+[data-testid='nav-user'] {
+  border-radius: var(--lph-radius-md) !important;
+  padding: 6px 8px !important;
+  height: auto !important;
+  gap: 10px !important;
+  transition:
+    background-color 160ms ease,
+    box-shadow 200ms ease !important;
+}
+
+[data-testid='nav-user']:hover,
+[data-testid='nav-user'][aria-expanded='true'] {
+  background: rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+}
+
+[data-testid='nav-user'][aria-expanded='true'] {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(249, 115, 22, 0.06) 0%,
+      transparent 60%
+    ),
+    rgba(255, 255, 255, 0.03) !important;
+}
+
+/* tighten avatar wrapper to 28px so footer fits in tighter density */
+[data-testid='nav-user'] > div:first-child {
+  width: 28px !important;
+  height: 28px !important;
+  margin: 0 !important;
+}
+
+[data-testid='nav-user'] > div:first-child > div {
+  width: 28px !important;
+  height: 28px !important;
+}
+
+[data-testid='nav-user'] > div:first-child img,
+[data-testid='nav-user'] > div:first-child > div > div {
+  width: 28px !important;
+  height: 28px !important;
+}
+
+[data-testid='nav-user'] > div:nth-child(2) {
+  margin: 0 !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  letter-spacing: -0.003em;
+  color: var(--lph-text) !important;
+}
+
+/* --- Kebab "..." button on convo items --- */
+.lph-convo-item button[id^='conversation-menu-'] {
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 8px !important;
+  color: var(--lph-text-faint) !important;
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease !important;
+}
+
+.lph-convo-item button[id^='conversation-menu-']:hover,
+.lph-convo-item button[id^='conversation-menu-'][aria-expanded='true'] {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: var(--lph-text) !important;
+}
+
+.lph-convo-item button[id^='conversation-menu-']:active {
+  transform: scale(0.9);
+}
+
+.lph-convo-item button[id^='conversation-menu-'] svg {
+  width: 16px !important;
+  height: 16px !important;
+  stroke-width: 1.75;
+}
+
+/* kebab dropdown surface (Ariakit menu emitted by ConvoOptions) */
+.lph-convo-item ~ [role='menu'],
+[id^='conversation-menu-'] + [role='menu'],
+[id*='conversation-menu'][role='menu'] {
+  background: var(--lph-bg-panel) !important;
+  border: 1px solid var(--lph-border-soft) !important;
+  border-radius: var(--lph-radius-lg) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 16px 40px rgba(0, 0, 0, 0.35) !important;
+  padding: 6px !important;
+}
+
+/* --- Convo item hover micro slide --- */
+.lph-convo-item {
+  transition:
+    background-color 160ms ease,
+    color 160ms ease,
+    transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 200ms ease !important;
+}
+
+.lph-convo-item:hover:not(.lph-convo-item-active) {
+  transform: translateX(1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lph-convo-item:hover:not(.lph-convo-item-active) {
+    transform: none;
+  }
+}
+
+/* --- Date header (HOJE / ÚLTIMOS 7 DIAS): hairline separator above (except first) --- */
+.lph-conversation-date {
+  position: relative;
+  padding-top: 12px;
+}
+
+.lph-conversation-date + .lph-conversation-date,
+.lph-convo-item + .lph-conversation-date,
+.ReactVirtualized__Grid .lph-conversation-date {
+  margin-top: 14px;
+}
+
+.lph-conversation-date::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 10px;
+  right: 10px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--lph-border-soft) 28%,
+    var(--lph-border-soft) 72%,
+    transparent 100%
+  );
+  opacity: 0.55;
+}
+
+/* primeira data não tem separator */
+.lph-conversations-list > .lph-conversation-date:first-child::before,
+.lph-conversation-virtual-list > .lph-conversation-date:first-child::before {
+  display: none;
+}
+
+/* ===========================================================
+ * LPH Premium polish — Lote Visual 6 (Rich Message Content)
+ * Migrado da referência LPH Manus para o markup real do
+ * LibreChat (Markdown.tsx + react-markdown + rehype-highlight
+ * + CodeBlock + Files + ArtifactButton).
+ *
+ * Aditivo. Mantém regras anteriores; sobrescreve via
+ * especificidade quando necessário. Sem TSX, sem lógica.
+ * =========================================================== */
+
+/* --- Headings: Fraunces serif (fallback Georgia) com sizes do design system --- */
+.message-content.markdown h1 {
+  font-family: var(--lph-brand-font, Georgia, 'Times New Roman', serif);
+  font-weight: 500;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  letter-spacing: -0.012em;
+  color: var(--lph-text);
+  margin: 1.4rem 0 0.55rem;
+}
+
+.message-content.markdown h2 {
+  font-family: var(--lph-brand-font, Georgia, 'Times New Roman', serif);
+  font-weight: 500;
+  font-size: 1.35rem;
+  line-height: 1.25;
+  letter-spacing: -0.012em;
+  color: var(--lph-text);
+  margin: 1.25rem 0 0.5rem;
+}
+
+.message-content.markdown h3 {
+  font-family: var(--lph-brand-font, Georgia, 'Times New Roman', serif);
+  font-weight: 500;
+  font-size: 1.18rem;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--lph-text);
+  margin: 1.1rem 0 0.4rem;
+}
+
+.message-content.markdown h4 {
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.94rem;
+  letter-spacing: -0.005em;
+  color: var(--lph-text);
+  margin: 0.9rem 0 0.35rem;
+}
+
+.message-content.markdown h5,
+.message-content.markdown h6 {
+  font-family: inherit;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--lph-text-muted);
+  margin: 0.8rem 0 0.3rem;
+}
+
+/* --- Paragraphs --- */
+.message-content.markdown p {
+  font-size: 0.94rem;
+  line-height: 1.65;
+  color: var(--lph-text);
+  margin: 0;
+}
+
+.message-content.markdown p + p {
+  margin-top: 0.7rem;
+}
+
+/* --- Lists --- */
+.message-content.markdown ul,
+.message-content.markdown ol {
+  padding-left: 22px;
+  margin: 0.7rem 0;
+}
+
+.message-content.markdown li {
+  margin-bottom: 0.35rem;
+  line-height: 1.6;
+}
+
+.message-content.markdown li::marker {
+  color: var(--lph-orange);
+  font-weight: 600;
+}
+
+.message-content.markdown ul ul,
+.message-content.markdown ol ol,
+.message-content.markdown ul ol,
+.message-content.markdown ol ul {
+  margin: 0.3rem 0;
+}
+
+/* --- Inline emphasis --- */
+.message-content.markdown strong {
+  color: var(--lph-text);
+  font-weight: 600;
+}
+
+.message-content.markdown em {
+  color: var(--lph-text-muted);
+  font-style: italic;
+}
+
+/* --- Links --- */
+.message-content.markdown a {
+  color: var(--lph-orange-soft);
+  text-decoration-color: rgba(251, 146, 60, 0.32);
+  text-underline-offset: 2px;
+  transition:
+    color 160ms ease,
+    text-decoration-color 160ms ease;
+}
+
+.message-content.markdown a:hover {
+  color: var(--lph-orange);
+  text-decoration-color: var(--lph-orange);
+}
+
+/* --- Inline code --- */
+.message-content.markdown :not(pre) > code {
+  font-family: ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+  font-size: 0.82rem;
+  border: 1px solid var(--lph-border-soft);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--lph-orange-soft);
+  border-radius: 5px;
+  padding: 0.08rem 0.35rem;
+}
+
+/* --- Tables --- */
+.message-content.markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+  margin: 0.9rem 0;
+  border: 1px solid var(--lph-border-soft);
+  border-radius: var(--lph-radius-md);
+  overflow: hidden;
+  background: var(--lph-bg-panel);
+}
+
+.message-content.markdown thead {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.message-content.markdown th {
+  text-align: left;
+  padding: 11px 14px;
+  font-weight: 600;
+  color: var(--lph-text);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--lph-border-soft);
+  background: transparent;
+}
+
+.message-content.markdown td {
+  padding: 10px 14px;
+  color: var(--lph-text-muted);
+  border-bottom: 1px solid var(--lph-border-soft);
+  border-color: var(--lph-border-soft);
+  vertical-align: top;
+}
+
+.message-content.markdown tr:last-child td {
+  border-bottom: none;
+}
+
+.message-content.markdown tbody tr {
+  transition: background-color 140ms ease;
+}
+
+.message-content.markdown tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+  color: var(--lph-text);
+}
+
+/* monospace para colunas com números (auto-detect via valor numérico difícil — usar via classe opcional `.num-cell`) */
+.message-content.markdown td.num-cell,
+.message-content.markdown th.num-cell {
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* indicadores de variação (usuário pode escrever <span class="pos">+12%</span>) */
+.message-content.markdown .pos {
+  color: #86efac;
+  font-weight: 500;
+}
+
+.message-content.markdown .neg {
+  color: #fca5a5;
+  font-weight: 500;
+}
+
+/* --- Blockquote como callout LPH --- */
+.message-content.markdown blockquote {
+  margin: 0.9rem 0;
+  padding: 12px 16px;
+  background: var(--lph-orange-glow);
+  border-left: 3px solid var(--lph-orange);
+  border-radius: 6px;
+  color: var(--lph-text);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.message-content.markdown blockquote p {
+  font-size: inherit;
+  line-height: inherit;
+  color: inherit;
+  margin: 0;
+}
+
+.message-content.markdown blockquote p + p {
+  margin-top: 0.45rem;
+}
+
+.message-content.markdown blockquote strong {
+  color: var(--lph-orange-soft);
+}
+
+/* --- Code blocks: container externo (CodeBlock.tsx) e body (pre/.hljs) --- */
+.message-content.markdown div.relative.rounded-xl[class*='border-border-light'] {
+  background: #1a1917 !important;
+  border-color: var(--lph-border-soft) !important;
+  border-radius: var(--lph-radius-md) !important;
+  margin: 0.9rem 0;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.03) inset,
+    0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+/* Code block header (CodeBar) — refinar tipografia */
+.message-content.markdown div.relative.rounded-xl[class*='border-border-light'] > div:first-child > div {
+  background: rgba(255, 255, 255, 0.02) !important;
+  border-bottom: 1px solid var(--lph-border-soft);
+  padding: 8px 14px !important;
+}
+
+.message-content.markdown div.relative.rounded-xl[class*='border-border-light'] > div:first-child span {
+  color: var(--lph-text-muted) !important;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+  font-size: 0.72rem;
+  text-transform: lowercase;
+  letter-spacing: 0;
+}
+
+/* Code body */
+.message-content.markdown pre {
+  margin: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+.message-content.markdown .hljs,
+.message-content.markdown pre code {
+  background: transparent !important;
+  padding: 0 !important;
+  font-family: ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
+  font-size: 0.79rem;
+  line-height: 1.65;
+  color: #e2e0d6 !important;
+}
+
+/* hljs token tweaks (subset — react-markdown via highlight.js) */
+.message-content.markdown .hljs-keyword,
+.message-content.markdown .hljs-selector-tag,
+.message-content.markdown .hljs-built_in {
+  color: var(--lph-orange-soft);
+}
+
+.message-content.markdown .hljs-string,
+.message-content.markdown .hljs-attr {
+  color: #86efac;
+}
+
+.message-content.markdown .hljs-comment,
+.message-content.markdown .hljs-quote {
+  color: var(--lph-text-faint);
+  font-style: italic;
+}
+
+.message-content.markdown .hljs-function,
+.message-content.markdown .hljs-title,
+.message-content.markdown .hljs-section {
+  color: #93c5fd;
+}
+
+.message-content.markdown .hljs-number,
+.message-content.markdown .hljs-literal {
+  color: #fcd34d;
+}
+
+.message-content.markdown .hljs-tag,
+.message-content.markdown .hljs-name {
+  color: var(--lph-orange-soft);
+}
+
+/* --- HR / dividers --- */
+.message-content.markdown hr {
+  border: none;
+  height: 1px;
+  margin: 1.4rem 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--lph-border-soft) 28%,
+    var(--lph-border-soft) 72%,
+    transparent 100%
+  );
+}
+
+/* --- File cards inside message (FileContainer rendered via Files.tsx) --- */
+.lph-message-row [class*='inline-block'][class*='text-text-primary'] > div:first-child {
+  background: var(--lph-bg-panel) !important;
+  border: 1px solid var(--lph-border-soft) !important;
+  border-radius: var(--lph-radius-md) !important;
+  padding: 10px !important;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.lph-message-row [class*='inline-block'][class*='text-text-primary'] > div:first-child:hover {
+  border-color: rgba(249, 115, 22, 0.32) !important;
+  background: var(--lph-bg-panel-hover) !important;
+}
+
+/* file thumb / type label dentro do FileContainer */
+.lph-message-row [class*='inline-block'][class*='text-text-primary'] .truncate.font-medium {
+  color: var(--lph-text) !important;
+  font-size: 0.8125rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.003em;
+}
+
+.lph-message-row [class*='inline-block'][class*='text-text-primary'] .truncate.text-text-secondary {
+  color: var(--lph-text-faint) !important;
+  font-size: 0.72rem !important;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* --- Inline image preview (Image.tsx via Files.tsx) --- */
+.lph-message-row img[alt][src],
+.lph-message-row picture > img {
+  border-radius: var(--lph-radius-md);
+  border: 1px solid var(--lph-border-soft);
+  background: var(--lph-bg-panel);
+  margin: 0.6rem 0;
+  max-width: 100%;
+}
+
+/* --- Definition lists (raros mas suportados pelo remark-gfm) --- */
+.message-content.markdown dl {
+  margin: 0.7rem 0;
+}
+
+.message-content.markdown dt {
+  font-weight: 600;
+  color: var(--lph-text);
+  margin-top: 0.5rem;
+}
+
+.message-content.markdown dd {
+  color: var(--lph-text-muted);
+  margin-left: 1rem;
+}
+
+/* --- Task lists (remark-gfm) --- */
+.message-content.markdown input[type='checkbox'] {
+  accent-color: var(--lph-orange);
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* --- Reduce motion respect --- */
+@media (prefers-reduced-motion: reduce) {
+  .message-content.markdown a,
+  .message-content.markdown tbody tr {
+    transition: none;
+  }
+}

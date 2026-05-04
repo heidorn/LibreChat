@@ -257,7 +257,7 @@ const ChatForm = memo(function ChatForm({
           <div
             onClick={handleContainerClick}
             className={cn(
-              'relative flex w-full flex-grow flex-col overflow-hidden rounded-t-3xl border pb-4 text-text-primary transition-all duration-200 sm:rounded-[28px] sm:pb-0',
+              'lph-composer-shell relative flex w-full flex-grow flex-col overflow-hidden rounded-t-3xl border pb-4 text-text-primary transition-all duration-200 sm:rounded-[28px] sm:pb-0',
               isTextAreaFocused
                 ? 'border-[var(--lph-orange-soft)] shadow-[0_0_0_3px_var(--lph-orange-glow),0_18px_50px_rgba(0,0,0,0.28)]'
                 : 'shadow-[0_14px_40px_rgba(0,0,0,0.22)]',
@@ -318,7 +318,7 @@ const ChatForm = memo(function ChatForm({
                     className={cn(
                       baseClasses,
                       removeFocusRings,
-                      'scrollbar-hover transition-[max-height] duration-200 disabled:cursor-not-allowed',
+                      'lph-composer-textarea scrollbar-hover transition-[max-height] duration-200 disabled:cursor-not-allowed',
                     )}
                   />
                 </div>
@@ -333,7 +333,7 @@ const ChatForm = memo(function ChatForm({
             )}
             <div
               className={cn(
-                '@container items-between flex gap-2 pb-2',
+                'lph-composer-actions-row @container items-between flex gap-2 pb-2 pt-1',
                 isRTL ? 'flex-row-reverse' : 'flex-row',
               )}
             >
